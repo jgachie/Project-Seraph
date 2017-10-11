@@ -71,17 +71,20 @@ public class Game implements Runnable{
         display.getCanvas().addMouseListener(mouseManager);
         display.getCanvas().addMouseMotionListener(mouseManager);
         
+        //Asset initialization
         Assets.init();
         
+        //Utility initialization
         handler = new Handler(this);
         gameCamera = new GameCamera(handler, 0, 0); //Set initial offsets to 0 for base position
         
+        //Playable character initialization
+        new Player(handler, 0, 0, "Sariel").save();
+        
+        //State initialization
         gameState = new GameState(handler);
         menuState = new MenuState(handler);
         State.setState(menuState); //Set current state to game state
-        
-        Player player = new Player(handler, 0, 0, "Sariel");
-        player.save(player, "Sariel");
     }
     
     private void tick(){

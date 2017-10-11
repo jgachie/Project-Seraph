@@ -89,4 +89,26 @@ public class Player extends Actor{
             return Assets.player;
         }
     }
+    
+    /**
+     * Player-specific save method; calls the save supermethod with a specific filename 
+     */
+    public void save(){
+        save(this, "Sariel");
+    }
+    
+    /**
+     * Player-specific load method; calls the load supermethod with a specific filename
+     * @param handler A handler object to replace the one that wasn't serialized
+     * @return The loaded Player object
+     */
+    public static Player load(Handler handler){
+        Player player = (Player) Actor.load("Sariel");
+        player.setHandler(handler);
+        return player;
+    }
+    
+    private void setHandler(Handler handler){
+        this.handler = handler;
+    }
 }

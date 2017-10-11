@@ -7,17 +7,20 @@ package Entities;
 
 import Main.Handler;
 import java.awt.*;
+import java.io.Serializable;
 
 /**
  *
  * @author Soup
  */
-public abstract class Entity {
-    protected Handler handler; //The game itself
+public abstract class Entity implements Serializable{
+    protected transient Handler handler; //The game itself
     protected float x, y; //X and Y positions
     protected int width, height; //Width/height of the entity
     protected boolean active = true; //If true, the entity is still on screen and should be ticked and rendered; if not, it's removed from the entity list and ignored
     protected Rectangle bounds; //Bounding box for collisions
+    
+    //Default constructor for serialization
     
     public Entity(Handler handler, float x, float y, int width, int height){
         this.handler = handler;

@@ -16,12 +16,12 @@ import java.io.*;
  */
 public abstract class Actor extends Creature implements Serializable{
     //Input streams for saving the actor to a file
-    private static FileInputStream fileIn;
-    private static ObjectInputStream objectIn;
+    private transient static FileInputStream fileIn;
+    private transient static ObjectInputStream objectIn;
     
     //Output streams for loading the actor into the game from a file
-    private FileOutputStream fileOut;
-    private ObjectOutputStream objectOut;
+    private transient FileOutputStream fileOut;
+    private transient ObjectOutputStream objectOut;
     
     protected String name; //Actor's name
     //protected Weapon weapon; //Actor's currently equipped weapon; will be implemented later when Weapon class is created
@@ -86,9 +86,9 @@ public abstract class Actor extends Creature implements Serializable{
      * Saves this version of an actor to an object file
      * @param actor The actor to be saved
      */
-    public void save(Actor actor, String name){
+    protected void save(Actor actor, String name){
         try{
-            fileOut = new FileOutputStream(name);
+            fileOut = new FileOutputStream("ActorSaves/" + name);
             objectOut = new ObjectOutputStream(fileOut);
             objectOut.writeObject(actor);
             objectOut.close();
@@ -104,7 +104,7 @@ public abstract class Actor extends Creature implements Serializable{
      * @param name The name of the actor, used to select the corresponding object file
      * @return The loaded actor object
      */
-    public static Actor load(String name){
+    protected static Actor load(String name){
         try{
             fileIn = new FileInputStream("ActorSaves/" + name);
             objectIn = new ObjectInputStream(fileIn);
@@ -119,6 +119,8 @@ public abstract class Actor extends Creature implements Serializable{
         
         return null;
     }
+    
+    public abstract void save();
     
     public String getName() {
         return name;

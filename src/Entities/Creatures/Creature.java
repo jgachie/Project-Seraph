@@ -8,12 +8,13 @@ package Entities.Creatures;
 import Entities.Entity;
 import Main.Handler;
 import Tiles.Tile;
+import java.io.Serializable;
 
 /**
  *
  * @author Soup
  */
-public abstract class Creature extends Entity{
+public abstract class Creature extends Entity implements Serializable{
     public static final float DEFAULT_SPEED = 3.0f; //Creature default speed
     public static final int DEFAULT_CREATURE_WIDTH = 32, DEFAULT_CREATURE_HEIGHT = 48; //Creature default width/height
     

@@ -28,7 +28,7 @@ public class World {
     
     public World(Handler handler, String path){
         this.handler = handler;
-        entityManager = new EntityManager(handler, (Player) Player.load("Sariel")); //Initialize entity manager with new player object
+        entityManager = new EntityManager(handler, Player.load(handler)); //Initialize entity manager with new player object
         uiManager = new UIManager(handler);
         
         entityManager.addEntity(new Tree(handler, 150, 100));
