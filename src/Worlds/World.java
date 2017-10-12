@@ -8,6 +8,7 @@ package Worlds;
 import Entities.Creatures.Actors.Player;
 import Entities.EntityManager;
 import Entities.Statics.Tree;
+import Graphics.Assets;
 import Main.Handler;
 import Tiles.Tile;
 import UI.UIManager;

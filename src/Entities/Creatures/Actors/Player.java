@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
  */
 public class Player extends Actor{
     //Declare animations
-    private Animation walkDown, walkUp, walkLeft, walkRight;
+    private static Animation walkDown, walkUp, walkLeft, walkRight;
     
     public Player(Handler handler, float x, float y, String name){
         super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, /*weapon*/ 1, 100,
