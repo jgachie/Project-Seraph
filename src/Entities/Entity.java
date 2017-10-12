@@ -96,4 +96,14 @@ public abstract class Entity implements Serializable{
     public void setHeight(int height) {
         this.height = height;
     }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+    
+    
 }

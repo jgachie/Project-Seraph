@@ -10,6 +10,7 @@ import Main.Handler;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 
 /**
  *
@@ -44,9 +45,12 @@ public class EntityManager {
     
     public void tick(){
         //Iterates through entity list and ticks each entity (DON'T CHANGE THIS; NOT AN ENHANCED FOR LOOP FOR A REASON)
-        for (int i = 0; i < entities.size(); i++){
-            Entity e = entities.get(i);
+        Iterator<Entity> it = entities.iterator();
+        while (it.hasNext()){
+            Entity e = it.next();
             e.tick();
+            if (!e.isActive())
+                it.remove();
         }
         
         entities.sort(renderSorter); //Sort entity list for proper rendering order
