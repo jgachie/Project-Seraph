@@ -26,7 +26,7 @@ public abstract class Actor extends Creature implements Serializable{
     private transient FileOutputStream fileOut;
     private transient ObjectOutputStream objectOut;
     
-    protected Random dieRoll = new Random(); //A Random object for determining various outcomes
+    private static Random dieRoll = new Random(); //A Random object for determining various outcomes
     
     protected String name; //Actor's name
     protected Weapon weapon; //Actor's currently equipped weapon
@@ -37,13 +37,15 @@ public abstract class Actor extends Creature implements Serializable{
     protected int maxHP; //Actor's max HP
     protected int mana; //How much mana the Actor has left
     protected int maxMP; //Actor's max MP
+    protected int skillpoints; //How many skillpoints the Actor has left
+    protected int maxSP; //Actor's max SP
     protected int strength; //Actor's strength stat; determines power of physical attacks
-    protected int dexterity; //Actor's dexterity stat; determines accuracy of all attacks and physical critical hit rate
-    protected int wisdom; //Actor's wisdom stat; determines power of magical attacks and magical critical hit rate
-    protected int intelligence; //Actor's intelligence stat; determines efficacy of support magic and magical defense state
+    protected int dexterity; //Actor's dexterity stat; determines accuracy of physical attacks and resistance stats
+    protected int wisdom; //Actor's wisdom stat; determines power of magical attacks and max MP
+    protected int intelligence; //Actor's intelligence stat; determines efficacy of support magic and magical defense stats
     protected int luck; //Actor's luck stat; determines item/gold drops and all critical hit rates
-    protected int defense; //Actor's defense stat; determines physical defense stats
-    protected int evasion; //Actor's evasion stat; determines evasion/flee rate
+    protected int defense; //Actor's defense stat; determines physical defense stats and max HP
+    protected int evasion; //Actor's evasion stat; determines evasion/flee success rate
     protected int skill; //Actor's skill stat; varies depending on the Actor
     protected int slashDef; //Actor's slash defense stat; determines damage absorbed from slash attacks
     protected int stabDef; //Actor's stab defense stat; determines damage absorbed from stab attacks
@@ -54,7 +56,11 @@ public abstract class Actor extends Creature implements Serializable{
     protected int iceDef; //Actor's water defense stat; determines damage absorbed from water attacks
     protected int earthDef; //Actor's earth defense stat; determines damage absorbed from earth attacks
     protected int lightningDef; //Actor's lightning defense stat; determines damage absorbed from lightning attacks
-    protected Stance stance = Stance.NEUTRAL; //Actor's stance; determines stat bonuses and penalties, as well as the availability of some attacks
+    protected int poisonRes; //Actor's resistance to poison/toxic; determines chance of being poisoned/toxined (max of 500)
+    protected int stunRes; //Actor's resistance to stun; determines chance of being stunned (max of 500)
+    protected int freezeRes; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
+    protected Stance stance; //Actor's stance; determines stat bonuses and penalties, as well as the availability of some attacks
+    protected StatusEffect status; //The status effect Actor is currently afflicted by; if there is no such effect, this will be null
     protected boolean alive = true; //Whether or not the Actor is alive
     protected boolean party; //Whether or not the Actor is currently in the player's party (for the player this is always set to "true")
     
@@ -65,8 +71,6 @@ public abstract class Actor extends Creature implements Serializable{
         this.name = name;
         this.weapon = weapon;
         this.level = level;
-        exp = 0;
-        expCap = level * 100;
         this.hitpoints = hitpoints;
         this.maxHP = hitpoints;
         this.mana = mana;
@@ -80,6 +84,15 @@ public abstract class Actor extends Creature implements Serializable{
         this.evasion = evasion;
         this.skill = skill;
         this.party = party;
+        
+        //Standard initializations
+        exp = 0;
+        expCap = level * 100;
+        stance = Stance.NEUTRAL;
+        poisonRes = 50;
+        stunRes = 50;
+        freezeRes = 50;
+        status = StatusEffect.NONE;
     }
     
     //ATTACK METHODS
@@ -100,7 +113,7 @@ public abstract class Actor extends Creature implements Serializable{
         }
         else{
             damage = calcAttackDamage();
-            damage = target.calcAttackReceived(damage, weapon.getType());
+            damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
         }
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
@@ -112,20 +125,87 @@ public abstract class Actor extends Creature implements Serializable{
     
     /**
      * Calculates physical attack damage based weapon base damage and Actor's stats
-     * @return
+     *
+     * Damage is calculated as follows: The base damage is obtained from a die roll, the range of which
+     * is set by the equipped weapon's minimum and maximum damage values. Attack multiplier is then
+     * applied based on strength level (implemented in tiers). For second and third tiers, additional
+     * damage is added to the initial calculation to make up for loss when attack multiplier decreases.
+     * After initial damage calculation is done, a critical multiplier is applied if the attack was
+     * critical.
+     * @return The amount of damage dealt
      */
     private int calcAttackDamage(){
-        int damage;
-        //Use Actor's dexterity to determine whether the attack hits or not
+        int baseDamage; //The base damage of the weapon
+        int damage = 0; //The amount of damage dealt
         
+        baseDamage = dieRoll.nextInt(weapon.getMaxDamage() + 1) + weapon.getMinDamage(); //Roll for base damage using weapon min and max damages as range
         
-        return 0;
+        /*
+        Determine damage dealt by a combination of strength and base damage based on die roll. With
+        base strength level of 5, attack muliplier is effectively 1, but increases by a factor of .2
+        with each level until level 25. At 25, the growth of the multiplier slows to .1, and at level
+        50, it falls to .05.
+        */
+        
+        if (strength < 25)
+            damage = (int) (baseDamage * (strength / 5.0));
+        else if (25 <= strength && strength < 50){
+            damage = (int) (baseDamage * (strength / 10.0) + (baseDamage * 2.4));
+        }
+        else if (strength > 50){
+            damage = (int) (baseDamage * (strength / 20.0) + (baseDamage * 4.9));
+        }
+        
+        //If the attack was critical, multiply the damage by 1.5
+        if (attackCrit())
+            damage *= 1.5;
+        
+        return damage;
     }
     
-    private int calcAttackReceived(int damage, DamageType type){
+    /**
+     * Calculates total damage received by Actor by applying defense modifiers to damage dealt. Also
+     * applies any status effects accompanied by attack.
+     * @param dmg The amount of damage dealt, before applying defense modifiers
+     * @param type The type of damage dealt
+     * @param effect The status effect to be inflicted
+     * @return The total damage received by the Actor
+     */
+    private int calcDamageReceived(int damage, DamageType type, StatusEffect effect){
+        /*
+        Defense doesn't affect damage reduction directly; increasing defense increases damage type defenses
+        (in addition to max hp), which in turn are used in damage reduction calculations
+        */
         
+        switch (type){
+            case SLASH:
+                
+                break;
+            case STAB:
+                break;
+            case CRUSH:
+                break;
+            case PIERCE:
+                break;
+            case MAGIC:
+                break;
+            case FIRE:
+                break;
+            case ICE:
+                break;
+            case EARTH:
+                break;
+            case LIGHTNING:
+                break;
+            default:
+                //Shouldn't ever get here; if you do, FUCKING PANIC
+        }
         
-        return 0;
+        //If there is an applicable status effect, run it against Actor's resistances and apply it
+        if (effect != StatusEffect.NONE)
+            statusHit(effect);
+        
+        return damage;
     }
     
     /**
@@ -152,9 +232,10 @@ public abstract class Actor extends Creature implements Serializable{
         int accuracy = dieRoll.nextInt(100); //Roll for accuracy
         
         /*
-        Determines hit success by a combination of die roll and dexterity. Dexterity efficacy gradually
-        deteriorates as stat level increases; by level 25, it's half as effective, and by level 50,
-        it's no longer a factor at all, and chances of missing remain at 14%.
+        Determines hit success by a combination of die roll and dexterity. With base dexterity level
+        of 5, base chance to hit will be 55%. Dexterity efficacy gradually diminishes as stat level
+        increases; by level 25, it's half as effective, and by level 50, it's no longer a factor at
+        all, and chances of missing remain at a constant 14%.
         */
         if (dexterity < 25){
             if (accuracy <= 50 - dexterity)
@@ -176,6 +257,76 @@ public abstract class Actor extends Creature implements Serializable{
         }
         
         return hit;
+    }
+    
+    /**
+     * Uses luck to determine whether attack was critical or not
+     * @return True if the attack is critical; false if otherwise
+     */
+    public boolean attackCrit(){
+        boolean crit = false; //Whether or not the attack will be critical; initialized to false
+        int chance = dieRoll.nextInt(100); //Roll for crit
+        
+        /*
+        Determines crit success by a combination of die roll and luck. With base luck level 5, base
+        chance of success is 6%. Luck efficacy gradually diminishes as stat level increases; by level
+        25, it's half as effective, and by level 50, it's no longer a factor at all, and chances of
+        success remain at a constant 21% (~1/5).
+        */
+        if (luck < 25){
+            if (chance <= 95 - (luck / 3))
+                crit = false;
+            else
+                crit = true;
+        }
+        else if (25 <= luck && luck < 50){
+            if (chance <= 87 - (luck / 6))
+                crit = false;
+            else
+                crit = true;
+        }
+        else if (luck >= 50){
+            if (chance <= 79)
+                crit = false;
+            else
+                crit = true;
+        }
+        
+        return crit;
+    }
+    
+    /**
+     * Uses resistances to determine whether status effect takes effect or not
+     * @param effect The status effect
+     */
+    private void statusHit(StatusEffect effect){
+        //If the Actor is already afflicted by a status effect, return
+        if (status != StatusEffect.NONE)
+            return;
+        
+        int chance = dieRoll.nextInt(500); //Roll for effect chance
+        
+        switch(effect){
+            case POISON:
+                if (chance <= 500 - poisonRes)
+                    status = effect;
+                break;
+            case TOXIC:
+                if (chance <= 500 - poisonRes)
+                    status = effect;
+                break;
+            case STUN:
+                if (chance <= 500 - stunRes)
+                    status = effect;
+                break;
+            case FREEZE:
+                if (chance <= 500 - freezeRes)
+                    status = effect;
+                break;
+            default:
+                //Shouldn't ever get here; if you do, FUCKING PANIC
+                break;
+        }
     }
     
     //SERIALIZATION METHODS
@@ -282,6 +433,22 @@ public abstract class Actor extends Creature implements Serializable{
     
     public void setMaxMP(int maxMP) {
         this.maxMP = maxMP;
+    }
+
+    public int getSkillpoints() {
+        return skillpoints;
+    }
+
+    public void setSkillpoints(int skillpoints) {
+        this.skillpoints = skillpoints;
+    }
+
+    public int getMaxSP() {
+        return maxSP;
+    }
+
+    public void setMaxSP(int maxSP) {
+        this.maxSP = maxSP;
     }
     
     public int getStrength() {
@@ -419,6 +586,30 @@ public abstract class Actor extends Creature implements Serializable{
     public void setLightningDef(int lightningDef) {
         this.lightningDef = lightningDef;
     }
+
+    public int getPoisonRes() {
+        return poisonRes;
+    }
+
+    public void setPoisonRes(int poisonRes) {
+        this.poisonRes = poisonRes;
+    }
+
+    public int getStunRes() {
+        return stunRes;
+    }
+
+    public void setStunRes(int stunRes) {
+        this.stunRes = stunRes;
+    }
+
+    public int getFreezeRes() {
+        return freezeRes;
+    }
+
+    public void setFreezeRes(int freezeRes) {
+        this.freezeRes = freezeRes;
+    }
     
     public boolean isAlive() {
         return alive;
@@ -450,5 +641,13 @@ public abstract class Actor extends Creature implements Serializable{
     
     public void setStance(Stance stance) {
         this.stance = stance;
+    }
+
+    public StatusEffect getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusEffect status) {
+        this.status = status;
     }
 }

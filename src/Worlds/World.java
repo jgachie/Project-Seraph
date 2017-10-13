@@ -82,8 +82,10 @@ public class World {
      */
     public Tile getTile(int x, int y){
         //If x and/or y are invalid coordinates, default to stone tile
-        if (x < 0 || y < 0 || x >= width || y >= height)
+        if (x < 0 || y < 0 || x >= width || y >= height){
+            System.out.println("Hello");
             return Tile.stoneTile;
+        }
         
         Tile t = Tile.tiles[tiles[x][y]]; //Find tile using ID look-up
         

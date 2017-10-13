@@ -12,5 +12,7 @@ package Misc;
 public enum StatusEffect {
     POISON,
     TOXIC,
-    PARALYZE;
+    STUN,
+    FREEZE,
+    NONE;
 }

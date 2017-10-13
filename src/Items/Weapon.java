@@ -7,7 +7,7 @@ package Items;
 
 import Graphics.Assets;
 import Items.Item;
-import Misc.DamageType;
+import Misc.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -17,25 +17,45 @@ import java.awt.image.BufferedImage;
 public class Weapon extends Item{
     //Hard-code all different types of weapons here
     public static Weapon[] weapons = new Weapon[256];
-    public static Weapon bareHands = new Weapon(Assets.stone, "Bare Hands", 0, 2, DamageType.CRUSH);
-    public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", 1, 5, DamageType.SLASH);
+    public static Weapon bareHands = new Weapon(Assets.stone, "Bare Hands", 0, 1, 3, DamageType.CRUSH);
+    public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", 1, 3, 6, DamageType.SLASH);
     
     //Class
-    protected final int baseDamage;
-    protected final DamageType type;
+    protected final int minDamage, maxDamage; //The lowest and highest amounts of damage the weapon itself can deal
+    protected final DamageType type; //The type of damage the weapon deals
+    protected final StatusEffect effect; //The type of status effect the weapon deals, if any at all
     
-    public Weapon(BufferedImage texture, String name, int ID, int baseDamage, DamageType type) {
+    private Weapon(BufferedImage texture, String name, int ID, int minDamage, int maxDamage, DamageType type,
+            StatusEffect effect) {
         super(texture, name, ID);
-        this.baseDamage = baseDamage;
+        this.minDamage = minDamage;
+        this.maxDamage = maxDamage;
         this.type = type;
+        this.effect = effect;
+    }
+    
+    private Weapon(BufferedImage texture, String name, int ID, int minDamage, int maxDamage, DamageType type){
+        super(texture, name, ID);
+        this.minDamage = minDamage;
+        this.maxDamage = maxDamage;
+        this.type = type;
+        this.effect = StatusEffect.NONE;
     }
     
     /**
-     * Returns the base damage of the weapon
-     * @return The base damage of the weapon
+     * Returns the minimum amount of damage the weapon can deal
+     * @return The minimum amount of damage the weapon can deal
      */
-    public int getBaseDamage(){
-        return baseDamage;
+    public int getMinDamage(){
+        return minDamage;
+    }
+    
+    /**
+     * Returns the maximum amount of damage the weapon can deal
+     * @return The maximum amount of damage the weapon can deal
+     */
+    public int getMaxDamage(){
+        return maxDamage;
     }
     
     /**
@@ -44,5 +64,13 @@ public class Weapon extends Item{
      */
     public DamageType getType(){
         return type;
+    }
+    
+    /**
+     * Returns the type of status effect the weapon inflicts
+     * @return The type of status effect the weapon inflicts
+     */
+    public StatusEffect getEffect(){
+        return effect;
     }
 }

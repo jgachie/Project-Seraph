@@ -45,6 +45,8 @@ public abstract class Creature extends Entity implements Serializable{
     public void moveX(){
         //Moving right
         if (xMove > 0){
+            //Don't need to check for offscreen movement; already taken care of by default tile
+            
             int tx = (int) (x + xMove + bounds.x + bounds.width) / Tile.TILE_WIDTH; //The target x-coordinate; where the creature is trying to move to
             
             /*
@@ -63,6 +65,10 @@ public abstract class Creature extends Entity implements Serializable{
         }
         //Moving left
         else if (xMove < 0){
+            //If the player tries to move offscreen, return **NOTE: Needs to be tweaked to be more precise, a few pixels still stray offscreen as it is now
+            if (x - xMove < 0.0)
+                return;
+            
             int tx = (int) (x + xMove + bounds.x) / Tile.TILE_WIDTH; //The target x-coordinate; where the creature is trying to move to
             
             /*
@@ -87,6 +93,10 @@ public abstract class Creature extends Entity implements Serializable{
     public void moveY(){
         //Moving up
         if (yMove < 0){
+            //If the player tries to move offscreen, return **NOTE: Needs to be tweaked to be more precise, a few pixels still stray offscreen as it is now
+            if (y - yMove < 0.0)
+                return;
+            
             int ty = (int) (y + yMove + bounds.y) / Tile.TILE_HEIGHT; //The target y-coordinate; where the creature is trying to move to
             
             /*
@@ -96,7 +106,7 @@ public abstract class Creature extends Entity implements Serializable{
             */
             if (!collisionWithTile((int) (x + bounds.x) / Tile.TILE_WIDTH, ty) &&
                     !collisionWithTile((int) (x + bounds.x + bounds.width) / Tile.TILE_WIDTH, ty)){
-                y += yMove; //Increase y-coordinate by amound defined in buffer
+                y += yMove; //Increase y-coordinate by amount defined in buffer
             }
             //If there is a collision, set y-coordinate of bounding box to be adjacent to tile
             else{
@@ -105,6 +115,8 @@ public abstract class Creature extends Entity implements Serializable{
         }
         //Moving down
         else if (yMove > 0){
+            //Don't need to check for offscreen movement; already taken care of by default tile
+            
             int ty = (int) (y + yMove + bounds.y + bounds.height) / Tile.TILE_HEIGHT; //The target y-coordinate; where the creature is trying to move to
             
             /*

@@ -209,4 +209,10 @@ dexterity, and wisdom, but reduces defense, evasion, and intelligence. Defensive
 while neutral maintains a balance between the stats. Stances can only be changed before battle (maybe);
 some attacks, spells, etc. require you to be in a certain stance in order to use them, while others 
 might put you in a different stance after using them.
+
+* Sometimes, before a battle, a scene may play out in which the player is presented with two or more
+dialogue options. Choosing an option will provide the player with a temporary boost to one of their
+stats for the duration of the battle; the stat to be boosted will depend on the dialogue option chosen.
+However, these dialogue options may have an impact on the story later in the game, and thus should not
+be taken lightly.
 */
