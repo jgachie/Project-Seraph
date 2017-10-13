@@ -9,14 +9,8 @@ package Misc;
  *
  * @author Soup
  */
-public enum DamageType {
-    SLASH,
-    STAB,
-    CRUSH,
-    PIERCE,
-    MAGIC,
-    FIRE,
-    ICE,
-    EARTH,
-    LIGHTNING;
+public enum Stance {
+    OFFENSIVE,
+    DEFENSIVE,
+    NEUTRAL;
 }

@@ -6,8 +6,11 @@
 package Entities.Creatures.Actors;
 
 import Entities.Creatures.Creature;
+import Items.Weapon;
 import Main.Handler;
+import Misc.*;
 import java.io.*;
+import java.util.Random;
 
 /**
  * Actors are creatures that participate in combat; this includes the player character, party members,
@@ -15,22 +18,24 @@ import java.io.*;
  * @author Soup
  */
 public abstract class Actor extends Creature implements Serializable{
-    //Input streams for saving the actor to a file
+    //Input streams for loading the Actor object during deserialization
     private transient static FileInputStream fileIn;
     private transient static ObjectInputStream objectIn;
     
-    //Output streams for loading the actor into the game from a file
+    //Output streams for saving the Actor object during serialization
     private transient FileOutputStream fileOut;
     private transient ObjectOutputStream objectOut;
     
+    protected Random dieRoll = new Random(); //A Random object for determining various outcomes
+    
     protected String name; //Actor's name
-    //protected Weapon weapon; //Actor's currently equipped weapon; will be implemented later when Weapon class is created
+    protected Weapon weapon; //Actor's currently equipped weapon
     protected int level = 1; //Actor's level
-    protected int exp = 0; //How much experience the actor currently has
-    protected int expCap = 100; //The total amount of experience needed for the actor to level up
-    protected int hitpoints; //How many hitpoints the actor has left
+    protected int exp = 0; //How much experience the Actor currently has
+    protected int expCap = 100; //The total amount of experience needed for the Actor to level up
+    protected int hitpoints; //How many hitpoints the Actor has left
     protected int maxHP; //Actor's max HP
-    protected int mana; //How much mana the actor has left
+    protected int mana; //How much mana the Actor has left
     protected int maxMP; //Actor's max MP
     protected int strength; //Actor's strength stat; determines power of physical attacks
     protected int dexterity; //Actor's dexterity stat; determines accuracy of all attacks and physical critical hit rate
@@ -39,26 +44,26 @@ public abstract class Actor extends Creature implements Serializable{
     protected int luck; //Actor's luck stat; determines item/gold drops and all critical hit rates
     protected int defense; //Actor's defense stat; determines physical defense stats
     protected int evasion; //Actor's evasion stat; determines evasion/flee rate
-    protected int skill; //Actor's skill stat; varies depending on the actor
+    protected int skill; //Actor's skill stat; varies depending on the Actor
     protected int slashDef; //Actor's slash defense stat; determines damage absorbed from slash attacks
     protected int stabDef; //Actor's stab defense stat; determines damage absorbed from stab attacks
     protected int crushDef; //Actor's crush defense stat; determines damage absorbed from crush attacks
     protected int pierceDef; //Actor's pierce defense stat; determines damage absorbed from pierce attacks (mostly ranged attacks)
     protected int magicDef; //Actor's magic defense stat; determines damage absorbed from non-elemental magic attacks
     protected int fireDef; //Actor's fire defense stat; determines damage absorbed from fire attacks
-    protected int waterDef; //Actor's water defense stat; determines damage absorbed from water attacks
+    protected int iceDef; //Actor's water defense stat; determines damage absorbed from water attacks
     protected int earthDef; //Actor's earth defense stat; determines damage absorbed from earth attacks
     protected int lightningDef; //Actor's lightning defense stat; determines damage absorbed from lightning attacks
-    protected boolean alive = true; //Whether or not the actor is alive
-    protected boolean party; //Whether or not the actor is currently in the player's party (for the player this is always set to "true")
+    protected Stance stance = Stance.NEUTRAL; //Actor's stance; determines stat bonuses and penalties, as well as the availability of some attacks
+    protected boolean alive = true; //Whether or not the Actor is alive
+    protected boolean party; //Whether or not the Actor is currently in the player's party (for the player this is always set to "true")
     
-    //Constructor to create a new actor for the first time
-    public Actor(Handler handler, float x, float y, int width, int height, String name, /*Weapon weapon,*/
+    public Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
             int level, int hitpoints, int mana, int strength, int dexterity, int wisdom, int intelligence,
             int luck, int defense, int evasion, int skill, boolean party){
         super(handler, x, y, width, height);
         this.name = name;
-        //this.weapon = weapon;
+        this.weapon = weapon;
         this.level = level;
         exp = 0;
         expCap = level * 100;
@@ -77,14 +82,107 @@ public abstract class Actor extends Creature implements Serializable{
         this.party = party;
     }
     
-    //Constructor to reload an actor from saved state
-    public Actor(Handler handler, float x, float y, int width, int height){
-        super(handler, x, y, width, height);
+    //ATTACK METHODS
+    
+    /**
+     * Player attack method; calls methods for calculating damage dealt and received, as well as the
+     * dealDamage method itself
+     * @param target The Actor being attacked
+     */
+    public void attack(Actor target){
+        int damage;
+        System.out.println(name + " prepares to attack..");
+        
+        //If the attack misses, return; otherwise, calculate initial damage dealt and then apply evasion and defense modifiers
+        if (!attackHit()){
+            System.out.println("...The attack missed!");
+            return;
+        }
+        else{
+            damage = calcAttackDamage();
+            damage = target.calcAttackReceived(damage, weapon.getType());
+        }
+        
+        //If the attack wasn't evaded or completely blocked, deal the damage to the target
+        if (damage > 0){
+            System.out.println("...The attack hit!");
+            target.dealDamage(damage);
+        }
     }
     
     /**
-     * Saves this version of an actor to an object file
-     * @param actor The actor to be saved
+     * Calculates physical attack damage based weapon base damage and Actor's stats
+     * @return
+     */
+    private int calcAttackDamage(){
+        int damage;
+        //Use Actor's dexterity to determine whether the attack hits or not
+        
+        
+        return 0;
+    }
+    
+    private int calcAttackReceived(int damage, DamageType type){
+        
+        
+        return 0;
+    }
+    
+    /**
+     * Takes calculated damage and subtracts it from Actor's hitpoints
+     * @param damage The amount of damage dealt
+     */
+    private void dealDamage(int damage){
+        hitpoints -= damage;
+        System.out.println(name + " took " + damage + " damage!");
+        
+        if (hitpoints <= 0){
+            hitpoints = 0;
+            alive = false;
+            System.out.println(name + " has been defeated!");
+        }
+    }
+    
+    /**
+     * Uses dexterity to determine whether attack hit or not
+     * @return True if the attack hit; false if it missed
+     */
+    private boolean attackHit(){
+        boolean hit = false; //Whether or not the attack hit; initialized to false
+        int accuracy = dieRoll.nextInt(100); //Roll for accuracy
+        
+        /*
+        Determines hit success by a combination of die roll and dexterity. Dexterity efficacy gradually
+        deteriorates as stat level increases; by level 25, it's half as effective, and by level 50,
+        it's no longer a factor at all, and chances of missing remain at 14%.
+        */
+        if (dexterity < 25){
+            if (accuracy <= 50 - dexterity)
+                hit = false;
+            else
+                hit = true;
+        }
+        else if (25 <= dexterity && dexterity < 50){
+            if (accuracy <= 38 - (dexterity / 2))
+                hit = false;
+            else
+                hit = true;
+        }
+        else if (dexterity >= 50){
+            if (accuracy <= 14)
+                hit = false;
+            else
+                hit = true;
+        }
+        
+        return hit;
+    }
+    
+    //SERIALIZATION METHODS
+    
+    /**
+     * Saves this version of an Actor to an object file
+     * @param actor The Actor to be saved
      */
     protected void save(Actor actor, String name){
         try{
@@ -100,9 +198,9 @@ public abstract class Actor extends Creature implements Serializable{
     }
     
     /**
-     * Loads a previous version of an actor from a saved object file
-     * @param name The name of the actor, used to select the corresponding object file
-     * @return The loaded actor object
+     * Loads a previous version of an Actor from a saved object file
+     * @param name The name of the Actor, used to select the corresponding object file
+     * @return The loaded Actor object
      */
     protected static Actor load(String name){
         try{
@@ -298,12 +396,12 @@ public abstract class Actor extends Creature implements Serializable{
         this.fireDef = fireDef;
     }
     
-    public int getWaterDef() {
-        return waterDef;
+    public int getIceDef() {
+        return iceDef;
     }
     
-    public void setWaterDef(int waterDef) {
-        this.waterDef = waterDef;
+    public void setIceDef(int iceDef) {
+        this.iceDef = iceDef;
     }
     
     public int getEarthDef() {
@@ -336,5 +434,21 @@ public abstract class Actor extends Creature implements Serializable{
     
     public void setParty(boolean party) {
         this.party = party;
+    }
+    
+    public Weapon getWeapon() {
+        return weapon;
+    }
+    
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
+    }
+    
+    public Stance getStance() {
+        return stance;
+    }
+    
+    public void setStance(Stance stance) {
+        this.stance = stance;
     }
 }

@@ -3,20 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Misc;
+package Entities.Creatures.Actors;
+
+import Items.Weapon;
 
 /**
  *
  * @author Soup
  */
-public enum DamageType {
-    SLASH,
-    STAB,
-    CRUSH,
-    PIERCE,
-    MAGIC,
-    FIRE,
-    ICE,
-    EARTH,
-    LIGHTNING;
+public interface PlayableActor {
+    
+    public void attack();
 }

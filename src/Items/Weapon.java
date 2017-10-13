@@ -17,7 +17,8 @@ import java.awt.image.BufferedImage;
 public class Weapon extends Item{
     //Hard-code all different types of weapons here
     public static Weapon[] weapons = new Weapon[256];
-    public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", 0, 10, DamageType.SLASH);
+    public static Weapon bareHands = new Weapon(Assets.stone, "Bare Hands", 0, 2, DamageType.CRUSH);
+    public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", 1, 5, DamageType.SLASH);
     
     //Class
     protected final int baseDamage;

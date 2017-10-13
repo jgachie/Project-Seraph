@@ -200,3 +200,13 @@ public class Game implements Runnable{
         }
     }
 }
+
+/*
+Notes
+
+* Three different stances: Offensive, defensive, and neutral. Offensive provides a boost to strength,
+dexterity, and wisdom, but reduces defense, evasion, and intelligence. Defensive does the exact opposite,
+while neutral maintains a balance between the stats. Stances can only be changed before battle (maybe);
+some attacks, spells, etc. require you to be in a certain stance in order to use them, while others 
+might put you in a different stance after using them.
+*/

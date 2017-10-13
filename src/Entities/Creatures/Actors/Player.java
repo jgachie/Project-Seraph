@@ -8,6 +8,7 @@ package Entities.Creatures.Actors;
 import Entities.Creatures.Creature;
 import Graphics.*;
 import Inventory.Inventory;
+import Items.Weapon;
 import Main.Handler;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -23,7 +24,7 @@ public class Player extends Actor{
     private Inventory inv;
     
     public Player(Handler handler, float x, float y, String name){
-        super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, /*weapon*/ 1, 100,
+        super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Weapon.bareHands, 1, 100,
                 100, 5, 5, 5, 5, 5, 5, 5, 5, true);
         
         //Set bounding box coordinates (relative to top-left corner of player entity) and width/height
