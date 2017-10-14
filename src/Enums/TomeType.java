@@ -3,14 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Misc;
+package Enums;
 
 /**
  *
  * @author Soup
  */
-public enum Stance {
-    OFFENSIVE,
-    DEFENSIVE,
-    NEUTRAL;
+public enum TomeType {
+    BASIC;
 }

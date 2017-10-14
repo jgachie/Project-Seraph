@@ -3,15 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Entities.Creatures.Actors;
-
-import Items.Weapon;
+package Enums;
 
 /**
  *
  * @author Soup
  */
-public interface PlayableActor {
-    
-    public void attack();
+public enum GrimoireType {
+    BASIC;
 }

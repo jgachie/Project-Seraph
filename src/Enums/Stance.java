@@ -3,16 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Misc;
+package Enums;
 
 /**
  *
  * @author Soup
  */
-public enum StatusEffect {
-    POISON,
-    TOXIC,
-    STUN,
-    FREEZE,
-    NONE;
+public enum Stance {
+    OFFENSIVE,
+    DEFENSIVE,
+    NEUTRAL;
 }

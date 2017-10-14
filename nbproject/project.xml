@@ -14,8 +14,12 @@
             </test-roots>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>grimoire</word>
             <word>hitpoints</word>
+            <word>Rynn</word>
+            <word>Spellcasting</word>
             <word>tilemap</word>
+            <word>Zanna</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

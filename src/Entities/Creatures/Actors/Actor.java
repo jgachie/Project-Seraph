@@ -5,10 +5,11 @@
 */
 package Entities.Creatures.Actors;
 
+import Enums.StatusEffect;
+import Enums.DamageType;
 import Entities.Creatures.Creature;
-import Items.Weapon;
+import Items.Equipment.Weapon;
 import Main.Handler;
-import Misc.*;
 import java.io.*;
 import java.util.Random;
 
@@ -17,7 +18,7 @@ import java.util.Random;
  * and enemies.
  * @author Soup
  */
-public abstract class Actor extends Creature implements Serializable{
+public abstract class Actor extends Creature{
     //Input streams for loading the Actor object during deserialization
     private transient static FileInputStream fileIn;
     private transient static ObjectInputStream objectIn;
@@ -30,15 +31,11 @@ public abstract class Actor extends Creature implements Serializable{
     
     protected String name; //Actor's name
     protected Weapon weapon; //Actor's currently equipped weapon
-    protected int level = 1; //Actor's level
-    protected int exp = 0; //How much experience the Actor currently has
-    protected int expCap = 100; //The total amount of experience needed for the Actor to level up
+    protected int level; //Actor's level
     protected int hitpoints; //How many hitpoints the Actor has left
     protected int maxHP; //Actor's max HP
     protected int mana; //How much mana the Actor has left
     protected int maxMP; //Actor's max MP
-    protected int skillpoints; //How many skillpoints the Actor has left
-    protected int maxSP; //Actor's max SP
     protected int strength; //Actor's strength stat; determines power of physical attacks
     protected int dexterity; //Actor's dexterity stat; determines accuracy of physical attacks and resistance stats
     protected int wisdom; //Actor's wisdom stat; determines power of magical attacks and max MP
@@ -46,7 +43,6 @@ public abstract class Actor extends Creature implements Serializable{
     protected int luck; //Actor's luck stat; determines item/gold drops and all critical hit rates
     protected int defense; //Actor's defense stat; determines physical defense stats and max HP
     protected int evasion; //Actor's evasion stat; determines evasion/flee success rate
-    protected int skill; //Actor's skill stat; varies depending on the Actor
     protected int slashDef; //Actor's slash defense stat; determines damage absorbed from slash attacks
     protected int stabDef; //Actor's stab defense stat; determines damage absorbed from stab attacks
     protected int crushDef; //Actor's crush defense stat; determines damage absorbed from crush attacks
@@ -59,14 +55,14 @@ public abstract class Actor extends Creature implements Serializable{
     protected int poisonRes; //Actor's resistance to poison/toxic; determines chance of being poisoned/toxined (max of 500)
     protected int stunRes; //Actor's resistance to stun; determines chance of being stunned (max of 500)
     protected int freezeRes; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
-    protected Stance stance; //Actor's stance; determines stat bonuses and penalties, as well as the availability of some attacks
-    protected StatusEffect status; //The status effect Actor is currently afflicted by; if there is no such effect, this will be null
+    protected StatusEffect status; //The status effect Actor is currently afflicted by
+    //Replace "status" with ArrayList of StatusEffects so an Actor can be afflicted by more than one status effect at a time
     protected boolean alive = true; //Whether or not the Actor is alive
     protected boolean party; //Whether or not the Actor is currently in the player's party (for the player this is always set to "true")
     
-    public Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
+    protected Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
             int level, int hitpoints, int mana, int strength, int dexterity, int wisdom, int intelligence,
-            int luck, int defense, int evasion, int skill, boolean party){
+            int luck, int defense, int evasion, boolean party){
         super(handler, x, y, width, height);
         this.name = name;
         this.weapon = weapon;
@@ -82,13 +78,9 @@ public abstract class Actor extends Creature implements Serializable{
         this.luck = luck;
         this.defense = defense;
         this.evasion = evasion;
-        this.skill = skill;
         this.party = party;
         
         //Standard initializations
-        exp = 0;
-        expCap = level * 100;
-        stance = Stance.NEUTRAL;
         poisonRes = 50;
         stunRes = 50;
         freezeRes = 50;
@@ -98,29 +90,24 @@ public abstract class Actor extends Creature implements Serializable{
     //ATTACK METHODS
     
     /**
-     * Player attack method; calls methods for calculating damage dealt and received, as well as the
+     * Actor attack method; calls methods for calculating damage dealt and received, as well as the
      * dealDamage method itself
-     * @param target The Actor being attacked
+     * @param target The Actor being targeted
      */
     public void attack(Actor target){
         int damage;
-        System.out.println(name + " prepares to attack..");
         
         //If the attack misses, return; otherwise, calculate initial damage dealt and then apply evasion and defense modifiers
-        if (!attackHit()){
-            System.out.println("...The attack missed!");
+        if (!attackHit())
             return;
-        }
         else{
             damage = calcAttackDamage();
             damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
         }
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
-        if (damage > 0){
-            System.out.println("...The attack hit!");
+        if (damage > 0)
             target.dealDamage(damage);
-        }
     }
     
     /**
@@ -179,7 +166,7 @@ public abstract class Actor extends Creature implements Serializable{
         
         switch (type){
             case SLASH:
-                
+                //I'll take care of this shit later
                 break;
             case STAB:
                 break;
@@ -213,13 +200,12 @@ public abstract class Actor extends Creature implements Serializable{
      * @param damage The amount of damage dealt
      */
     private void dealDamage(int damage){
-        hitpoints -= damage;
-        System.out.println(name + " took " + damage + " damage!");
+        hitpoints -= damage; //Subract damage from Actor's hitpoints
         
+        //If the Actor's hitpoints fall to or below 0, the Actor is dead
         if (hitpoints <= 0){
             hitpoints = 0;
             alive = false;
-            System.out.println(name + " has been defeated!");
         }
     }
     
@@ -387,22 +373,6 @@ public abstract class Actor extends Creature implements Serializable{
         this.level = level;
     }
     
-    public int getExp() {
-        return exp;
-    }
-    
-    public void setExp(int exp) {
-        this.exp = exp;
-    }
-    
-    public int getExpCap() {
-        return expCap;
-    }
-    
-    public void setExpCap(int expCap) {
-        this.expCap = expCap;
-    }
-    
     public int getHitpoints() {
         return hitpoints;
     }
@@ -433,22 +403,6 @@ public abstract class Actor extends Creature implements Serializable{
     
     public void setMaxMP(int maxMP) {
         this.maxMP = maxMP;
-    }
-
-    public int getSkillpoints() {
-        return skillpoints;
-    }
-
-    public void setSkillpoints(int skillpoints) {
-        this.skillpoints = skillpoints;
-    }
-
-    public int getMaxSP() {
-        return maxSP;
-    }
-
-    public void setMaxSP(int maxSP) {
-        this.maxSP = maxSP;
     }
     
     public int getStrength() {
@@ -505,14 +459,6 @@ public abstract class Actor extends Creature implements Serializable{
     
     public void setEvasion(int evasion) {
         this.evasion = evasion;
-    }
-    
-    public int getSkill() {
-        return skill;
-    }
-    
-    public void setSkill(int skill) {
-        this.skill = skill;
     }
     
     public int getSlashDef() {
@@ -633,14 +579,6 @@ public abstract class Actor extends Creature implements Serializable{
     
     public void setWeapon(Weapon weapon) {
         this.weapon = weapon;
-    }
-    
-    public Stance getStance() {
-        return stance;
-    }
-    
-    public void setStance(Stance stance) {
-        this.stance = stance;
     }
 
     public StatusEffect getStatus() {

@@ -20,7 +20,7 @@ public abstract class Entity implements Serializable{
     protected boolean active = true; //If true, the entity is still on screen and should be ticked and rendered; if not, it's removed from the entity list and ignored
     protected Rectangle bounds; //Bounding box for collisions
     
-    public Entity(Handler handler, float x, float y, int width, int height){
+    protected Entity(Handler handler, float x, float y, int width, int height){
         this.handler = handler;
         this.x = x;
         this.y = y;

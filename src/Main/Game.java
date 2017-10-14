@@ -6,19 +6,14 @@
 package Main;
 
 import Display.Display;
-import Entities.Creatures.Actors.Player;
+import Entities.Creatures.Actors.PlayableActor.Player;
 import Graphics.Assets;
 import Graphics.GameCamera;
-import Graphics.ImageLoader;
-import Graphics.SpriteSheet;
 import Input.KeyManager;
 import Input.MouseManager;
 import States.*;
-import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 
 /**
  *
@@ -204,6 +199,8 @@ public class Game implements Runnable{
 /*
 Notes
 
+                                        ***TO BE DONE***
+
 * Three different stances: Offensive, defensive, and neutral. Offensive provides a boost to strength,
 dexterity, and wisdom, but reduces defense, evasion, and intelligence. Defensive does the exact opposite,
 while neutral maintains a balance between the stats. Stances can only be changed before battle (maybe);
@@ -215,4 +212,13 @@ dialogue options. Choosing an option will provide the player with a temporary bo
 stats for the duration of the battle; the stat to be boosted will depend on the dialogue option chosen.
 However, these dialogue options may have an impact on the story later in the game, and thus should not
 be taken lightly.
+
+
+                                        ***TO BE DECIDED***
+
+* Make Rynn a man
+
+* Add an option at the beginning of the game for the player to choose the player character's gender;
+this could lead into romantic subplots in the game which would deepen significance of player-character
+interactions
 */

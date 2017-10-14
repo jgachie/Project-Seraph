@@ -3,12 +3,13 @@
 * To change this template file, choose Tools | Templates
 * and open the template in the editor.
 */
-package Entities.Creatures.Actors;
+package Entities.Creatures.Actors.PlayableActor;
 
-import Entities.Creatures.Creature;
+import Entities.Creatures.Actors.Actor;
+import Enums.Characters;
 import Graphics.*;
 import Inventory.Inventory;
-import Items.Weapon;
+import Items.Equipment.Weapon;
 import Main.Handler;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -17,15 +18,15 @@ import java.awt.image.BufferedImage;
  *
  * @author Soup
  */
-public class Player extends Actor{
+public class Player extends PlayableActor{
     //Declare animations (must be static for serialization)
     private static Animation walkDown, walkUp, walkLeft, walkRight;
     
     private Inventory inv;
     
     public Player(Handler handler, float x, float y, String name){
-        super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Weapon.bareHands, 1, 100,
-                100, 5, 5, 5, 5, 5, 5, 5, 5, true);
+        super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Characters.SARIEL,
+                Weapon.bareHands, 1, 100, 100, 100, 5, 5, 5, 5, 5, 5, 5, 5, true);
         
         //Set bounding box coordinates (relative to top-left corner of player entity) and width/height
         bounds.x = 8;

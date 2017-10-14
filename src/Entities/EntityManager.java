@@ -5,7 +5,7 @@
 */
 package Entities;
 
-import Entities.Creatures.Actors.Player;
+import Entities.Creatures.Actors.PlayableActor.Player;
 import Main.Handler;
 import java.awt.Graphics;
 import java.util.ArrayList;

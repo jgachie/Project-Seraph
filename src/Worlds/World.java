@@ -5,7 +5,7 @@
  */
 package Worlds;
 
-import Entities.Creatures.Actors.Player;
+import Entities.Creatures.Actors.PlayableActor.Player;
 import Entities.EntityManager;
 import Entities.Statics.Tree;
 import Graphics.Assets;

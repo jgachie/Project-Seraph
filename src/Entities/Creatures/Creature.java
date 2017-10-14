@@ -14,14 +14,14 @@ import java.io.Serializable;
  *
  * @author Soup
  */
-public abstract class Creature extends Entity implements Serializable{
+public abstract class Creature extends Entity{
     public static final float DEFAULT_SPEED = 3.0f; //Creature default speed
     public static final int DEFAULT_CREATURE_WIDTH = 32, DEFAULT_CREATURE_HEIGHT = 48; //Creature default width/height
     
     protected float speed; //How fast the creature moves
     protected float xMove, yMove; //Movement buffers; holds amount of pixels moved and is added to position later to show movement
     
-    public Creature(Handler handler, float x, float y, int width, int height){
+    protected Creature(Handler handler, float x, float y, int width, int height){
         super(handler, x, y, width, height);
         speed = DEFAULT_SPEED;
         xMove = 0;
