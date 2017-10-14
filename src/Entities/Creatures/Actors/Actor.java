@@ -58,11 +58,10 @@ public abstract class Actor extends Creature{
     protected StatusEffect status; //The status effect Actor is currently afflicted by
     //Replace "status" with ArrayList of StatusEffects so an Actor can be afflicted by more than one status effect at a time
     protected boolean alive = true; //Whether or not the Actor is alive
-    protected boolean party; //Whether or not the Actor is currently in the player's party (for the player this is always set to "true")
     
     protected Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
             int level, int hitpoints, int mana, int strength, int dexterity, int wisdom, int intelligence,
-            int luck, int defense, int evasion, boolean party){
+            int luck, int defense, int evasion){
         super(handler, x, y, width, height);
         this.name = name;
         this.weapon = weapon;
@@ -78,7 +77,6 @@ public abstract class Actor extends Creature{
         this.luck = luck;
         this.defense = defense;
         this.evasion = evasion;
-        this.party = party;
         
         //Standard initializations
         poisonRes = 50;
@@ -357,12 +355,22 @@ public abstract class Actor extends Creature{
     
     public abstract void save();
     
+    //GETTERS/SETTERS
+    
     public String getName() {
         return name;
     }
     
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public Weapon getWeapon() {
+        return weapon;
+    }
+    
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
     }
     
     public int getLevel() {
@@ -563,22 +571,6 @@ public abstract class Actor extends Creature{
     
     public void setAlive(boolean alive) {
         this.alive = alive;
-    }
-    
-    public boolean isParty() {
-        return party;
-    }
-    
-    public void setParty(boolean party) {
-        this.party = party;
-    }
-    
-    public Weapon getWeapon() {
-        return weapon;
-    }
-    
-    public void setWeapon(Weapon weapon) {
-        this.weapon = weapon;
     }
 
     public StatusEffect getStatus() {
