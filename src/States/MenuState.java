@@ -18,19 +18,19 @@ import java.awt.Graphics;
  * @author Soup
  */
 public class MenuState extends State{
-    private UIManager manager; //The UI Manager
+    private UIManager uiManager; //The UI Manager
     
     public MenuState(Handler handler){
         super(handler);
-        manager = new UIManager(handler); //Initialize the UI Manager
-        handler.getMouseManager().setUIManager(manager); //Feed the manager through to the Mouse Manager to facilitate click and move events
+        uiManager = new UIManager(handler); //Initialize the UI Manager
+        handler.getMouseManager().setUIManager(uiManager); //Feed the manager through to the Mouse Manager to facilitate click and move events
         
         /*
         Add the start button to the UI Manager; the UIImageButton requires a ClickListener, so we'll
         create a subclass within the method call to satisfy it. Define the onClick() method to do whatever
         clicking on the button is supposed to do.
         */
-        manager.addObject(new UIImageButton(200, 200, 128, 64, Assets.btn_start, new ClickListener(){
+        uiManager.addObject(new UIImageButton(200, 200, 128, 64, Assets.btn_start, new ClickListener(){
             @Override
             public void onClick() {
                 handler.getMouseManager().setUIManager(null); //Dispose of the menu state's UI Manager
@@ -41,12 +41,12 @@ public class MenuState extends State{
     
     @Override
     public void tick() {
-        manager.tick();
+        uiManager.tick();
     }
     
     @Override
     public void render(Graphics g) {
-        manager.render(g);
+        uiManager.render(g);
     }
     
 }

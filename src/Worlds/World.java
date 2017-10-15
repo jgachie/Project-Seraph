@@ -5,6 +5,8 @@
  */
 package Worlds;
 
+import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.PlayableActor.PlayableActor;
 import Entities.Creatures.Actors.PlayableActor.Player;
 import Entities.EntityManager;
 import Entities.Statics.Tree;
@@ -14,6 +16,7 @@ import Tiles.Tile;
 import UI.UIManager;
 import Utils.Utils;
 import java.awt.Graphics;
+import java.util.ArrayList;
 
 /**
  *
@@ -27,17 +30,41 @@ public class World {
     private EntityManager entityManager; //Manager for all entities in the world
     private UIManager uiManager; //Manager for all UI objects in the world
     
+    //Combat spawn coordinates for Player and enemy parties; Players always appear on left side of the screen, while enemies appear on the right
+    private static final int PARTY_SPAWN_X = 100, ENEMY_SPAWN_X = 700;
+    private static final int SPAWN_Y = 100;
+    
+    
     public World(Handler handler, String path){
         this.handler = handler;
         entityManager = new EntityManager(handler, Player.load(handler)); //Initialize entity manager with new player object
         uiManager = new UIManager(handler);
         
-        entityManager.addEntity(new Tree(handler, 150, 100));
         loadWorld(path); //Load world into game
         
-        //Set spawn point of player
+        //Set spawn point of Player
         entityManager.getPlayer().setX(spawnX);
         entityManager.getPlayer().setY(spawnY);
+    }
+    
+    public World(Handler handler, String path, ArrayList<PlayableActor> party, ArrayList<Actor> enemyParty){
+        this.handler = handler;
+        
+        uiManager = new UIManager(handler);
+        
+        loadWorld(path);
+        
+        //Set Player spawn points
+        for (int i = 0; i < party.size(); i++){
+            party.get(i).setX(PARTY_SPAWN_X);
+            party.get(i).setY(SPAWN_Y + (150 * i));
+        }
+        
+        //Set enemy spawn points
+        for (int i = 0; i < enemyParty.size(); i++){
+            enemyParty.get(i).setX(ENEMY_SPAWN_X);
+            enemyParty.get(i).setY(SPAWN_Y + (150 * i));
+        }
     }
     
     public void tick(){
@@ -82,17 +109,14 @@ public class World {
      */
     public Tile getTile(int x, int y){
         //If x and/or y are invalid coordinates, default to stone tile
-        if (x < 0 || y < 0 || x >= width || y >= height){
-            System.out.println("Hello");
+        if (x < 0 || y < 0 || x >= width || y >= height)
             return Tile.stoneTile;
-        }
         
         Tile t = Tile.tiles[tiles[x][y]]; //Find tile using ID look-up
         
         //If ID hasn't been set yet, default to stone tile
-        if (t == null){
+        if (t == null)
             return Tile.stoneTile;
-        }
         
         return t; //Return tile
     }

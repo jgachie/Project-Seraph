@@ -6,6 +6,7 @@
 package States;
 
 import Main.Handler;
+import UI.UIManager;
 import Worlds.World;
 import java.awt.Graphics;
 
@@ -15,6 +16,7 @@ import java.awt.Graphics;
  */
 public class CombatState extends State{
     private World world; //The world
+    private UIManager uiManager; //The UI Manager
     
     public CombatState(Handler handler){
         super(handler);

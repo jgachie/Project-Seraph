@@ -5,6 +5,7 @@
  */
 package Main;
 
+import Combat.Combat;
 import Graphics.GameCamera;
 import Input.KeyManager;
 import Input.MouseManager;
@@ -16,7 +17,8 @@ import Worlds.World;
  */
 public class Handler {
     private Game game; //The game itself
-    private World world; //The World
+    private World world; //The world
+    private Combat combat; //The Combat object
     
     public Handler(Game game){
         this.game = game;
@@ -58,5 +60,11 @@ public class Handler {
         this.world = world;
     }
     
+    public Combat getCombat(){
+        return combat;
+    }
     
+    public void setCombat(Combat combat){
+        this.combat = combat;
+    }
 }

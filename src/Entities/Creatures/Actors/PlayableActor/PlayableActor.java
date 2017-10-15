@@ -30,9 +30,9 @@ public abstract class PlayableActor extends Actor{
     
     protected PlayableActor(Handler handler, float x, float y, int width, int height, String name, Characters character,
             Weapon weapon, int level, int hitpoints, int mana, int skillpoints, int strength, int dexterity,
-            int wisdom, int intelligence, int luck, int defense, int evasion, int skill) {
+            int wisdom, int intelligence, int luck, int defense, int agility, int skill) {
         super(handler, x, y, width, height, name, weapon, level, hitpoints, mana, strength, dexterity,
-                wisdom, intelligence, luck, defense, evasion);
+                wisdom, intelligence, luck, defense, agility);
         this.CHARACTER = character;
         this.skillpoints = skillpoints;
         this.maxSP = skillpoints;
@@ -65,7 +65,7 @@ public abstract class PlayableActor extends Actor{
      * @return An array containing the Actor's stats
      */
     public int[] getStats(){
-        return new int[]{strength, dexterity, wisdom, intelligence, luck, defense, evasion, skill};
+        return new int[]{strength, dexterity, wisdom, intelligence, luck, defense, agility, skill};
     }
     
     //GETTERS/SETTERS

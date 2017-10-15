@@ -22,10 +22,10 @@ public class EntityManager {
     private ArrayList<Entity> entities; //ArrayList holding all of the entities in the game
     //Comparator to sort the entity list by bottom y-coordinate (lowest to highest) for render order
     private Comparator<Entity> renderSorter = new Comparator<Entity>(){
-        @Override
         /**
          * Compares Entities a and b to see which should render first
          */
+        @Override
         public int compare(Entity a, Entity b) {
             //If the bottom of Entity a is higher up on the screen than that of Entity b, render a first; if not, render b first
             if (a.getY() + a.getHeight() < b.getY() + b.getHeight())

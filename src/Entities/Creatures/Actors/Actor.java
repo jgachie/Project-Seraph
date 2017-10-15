@@ -42,7 +42,7 @@ public abstract class Actor extends Creature{
     protected int intelligence; //Actor's intelligence stat; determines efficacy of support magic and magical defense stats
     protected int luck; //Actor's luck stat; determines item/gold drops and all critical hit rates
     protected int defense; //Actor's defense stat; determines physical defense stats and max HP
-    protected int evasion; //Actor's evasion stat; determines evasion/flee success rate
+    protected int agility; //Actor's agility stat; determines evasion/flee success rate and attack order
     protected int slashDef; //Actor's slash defense stat; determines damage absorbed from slash attacks
     protected int stabDef; //Actor's stab defense stat; determines damage absorbed from stab attacks
     protected int crushDef; //Actor's crush defense stat; determines damage absorbed from crush attacks
@@ -61,7 +61,7 @@ public abstract class Actor extends Creature{
     
     protected Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
             int level, int hitpoints, int mana, int strength, int dexterity, int wisdom, int intelligence,
-            int luck, int defense, int evasion){
+            int luck, int defense, int agility){
         super(handler, x, y, width, height);
         this.name = name;
         this.weapon = weapon;
@@ -76,7 +76,7 @@ public abstract class Actor extends Creature{
         this.intelligence = intelligence;
         this.luck = luck;
         this.defense = defense;
-        this.evasion = evasion;
+        this.agility = agility;
         
         //Standard initializations
         poisonRes = 50;
@@ -95,7 +95,7 @@ public abstract class Actor extends Creature{
     public void attack(Actor target){
         int damage;
         
-        //If the attack misses, return; otherwise, calculate initial damage dealt and then apply evasion and defense modifiers
+        //If the attack misses, return; otherwise, calculate initial damage dealt and then apply defense modifiers
         if (!attackHit())
             return;
         else{
@@ -461,12 +461,12 @@ public abstract class Actor extends Creature{
         this.defense = defense;
     }
     
-    public int getEvasion() {
-        return evasion;
+    public int getAgility() {
+        return agility;
     }
     
-    public void setEvasion(int evasion) {
-        this.evasion = evasion;
+    public void setAgility(int agility) {
+        this.agility = agility;
     }
     
     public int getSlashDef() {

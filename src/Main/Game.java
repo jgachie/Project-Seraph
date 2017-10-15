@@ -55,7 +55,9 @@ public class Game implements Runnable{
         mouseManager = new MouseManager();
     }
     
-    //Initialization
+    /**
+     * Game initialization
+     */
     private void init(){
         display = new Display(title, width, height);
         
@@ -172,6 +174,9 @@ public class Game implements Runnable{
         return height;
     }
     
+    /**
+     * Starts the game
+     */
     public synchronized void start(){
         //If the game is already running, do nothing and leave
         if (running)
@@ -182,6 +187,9 @@ public class Game implements Runnable{
         thread.start();
     }
     
+    /**
+     * Ends the game
+     */
     public synchronized void stop(){
         //If the game is already stopped, do nothing and leave
         if (!running)
@@ -207,18 +215,37 @@ while neutral maintains a balance between the stats. Stances can only be changed
 some attacks, spells, etc. require you to be in a certain stance in order to use them, while others 
 might put you in a different stance after using them.
 
-* Sometimes, before a battle, a scene may play out in which the player is presented with two or more
-dialogue options. Choosing an option will provide the player with a temporary boost to one of their
+* Sometimes, before a battle, a scene may play out in which the Player is presented with two or more
+dialogue options. Choosing an option will provide the Player with a temporary boost to one of their
 stats for the duration of the battle; the stat to be boosted will depend on the dialogue option chosen.
 However, these dialogue options may have an impact on the story later in the game, and thus should not
 be taken lightly.
 
+* Throughout the story, the Player will be presented with options on the actions he/she may take, which
+eventually have an impact on the rest of the story. However, in some cases, having certain stat levels
+(particularly the Chaos stat; maybe the other stats as well) will restrict the options available to 
+the Player, and sometimes even force them to choose a specific option. For example, at one point the
+Player may be presented with the opportunity to spare an enemy or kill it mercilessly, but if his/her
+Chaos stat is too high, the Player will be forced to slay the enemy.
+
+* Add a Charm equipment type. Charms can be equipped to different characters in their charm slots, and,
+in additon to boosting (or in some cases lowering) character stats, they often have unique effects that
+range from helping the player in battle to opening new avenues of character interactions to even affecting
+the story.
+
+* Yffia (Sariel's mother) kept a diary after her son was taken from her. Gathering the scattered pages
+will provide the player with backstory on the events that took place 700 years ago, including the Ash
+Rebellion, the Six Years of Shadow, Yffia and the Willful's government reconstruction efforts, and her
+search for her lost son. Collecting all of the pages yields the player with a new charm: Yffia's Diary.
+When equipped, it reduces the Player's Chaos stat by 8, and has the hidden effect of preventing high
+Chaos levels from making decisions for the Player.
+
 
                                         ***TO BE DECIDED***
 
-* Make Rynn a man
+* Make Rynn a man.
 
-* Add an option at the beginning of the game for the player to choose the player character's gender;
-this could lead into romantic subplots in the game which would deepen significance of player-character
-interactions
+* Add an option at the beginning of the game for the player to choose the player character's gender.
+This could lead into romantic subplots in the game which would deepen significance of player-character
+interactions.
 */
