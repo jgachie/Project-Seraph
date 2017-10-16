@@ -41,8 +41,8 @@ public class UIManager {
     }
     
     public void onMouseRelease(MouseEvent e){
-        for (UIObject o : objects)
-            o.onMouseRelease(e);
+        for (int i = 0; i < objects.size(); i++)
+            objects.get(i).onMouseRelease(e);
     }
     
     /**
@@ -59,6 +59,21 @@ public class UIManager {
      */
     public void removeObject(UIObject o){
         objects.remove(o);
+    }
+    
+    /**
+     * Removes the object at the given index from the object list
+     * @param index The index of the object to be removed
+     */
+    public void removeObject(int index){
+        objects.remove(index);
+    }
+    
+    /**
+     * Removes the object at the last index of the object list
+     */
+    public void removeLast(){
+        objects.remove(objects.size() - 1);
     }
 
     public Handler getHandler() {

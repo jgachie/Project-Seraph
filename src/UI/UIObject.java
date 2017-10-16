@@ -14,16 +14,20 @@ import java.awt.event.MouseEvent;
  * @author Soup
  */
 public abstract class UIObject {
+    protected String text; //The text of the object
     protected float x, y; //Object coordinates
     protected int width, height; //Object width/height
     protected Rectangle bounds; //Bounding box for object
+    protected boolean visible; //Whether the object is visible or not
     protected boolean hovering = false; //Whether or not the mouse is hovering over the object
     
-    public UIObject(float x, float y, int width, int height){
+    public UIObject(String text, float x, float y, int width, int height, boolean visible){
+        this.text = text;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.visible = visible;
         bounds = new Rectangle((int) x, (int) y, width, height);
     }
     
@@ -55,7 +59,16 @@ public abstract class UIObject {
             onClick();
     }
     
-    //Getters/Setters
+    //GETTERS/SETTERS
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+    
     public float getX() {
         return x;
     }
@@ -95,6 +108,12 @@ public abstract class UIObject {
     public void setHovering(boolean hovering) {
         this.hovering = hovering;
     }
-    
-    
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 }

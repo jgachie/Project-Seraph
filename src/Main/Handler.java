@@ -1,11 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Main;
 
-import Combat.Combat;
+import Combat.Encounter;
 import Graphics.GameCamera;
 import Input.KeyManager;
 import Input.MouseManager;
@@ -18,7 +18,8 @@ import Worlds.World;
 public class Handler {
     private Game game; //The game itself
     private World world; //The world
-    private Combat combat; //The Combat object
+    private Thread combat; //The thread that combat is running on
+    private Encounter encounter; //The next encounter
     
     public Handler(Game game){
         this.game = game;
@@ -43,28 +44,36 @@ public class Handler {
     public int getHeight(){
         return game.getHeight();
     }
-
+    
     public Game getGame() {
         return game;
     }
-
+    
     public void setGame(Game game) {
         this.game = game;
     }
-
+    
     public World getWorld() {
         return world;
     }
-
+    
     public void setWorld(World world) {
         this.world = world;
     }
     
-    public Combat getCombat(){
+    public Thread getCombat(){
         return combat;
     }
     
-    public void setCombat(Combat combat){
+    public void setCombat(Thread combat){
         this.combat = combat;
+    }
+    
+    public Encounter getEncounter() {
+        return encounter;
+    }
+    
+    public void setEncounter(Encounter encounter) {
+        this.encounter = encounter;
     }
 }

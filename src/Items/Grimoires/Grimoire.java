@@ -6,7 +6,7 @@
 package Items.Grimoires;
 
 import Entities.Creatures.Actors.Actor;
-import Entities.Creatures.Actors.PlayableActor.PlayableActor;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Equipment.Equipment;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -18,7 +18,9 @@ import Enums.GrimoireType;
  * @author Soup
  */
 public abstract class Grimoire extends Equipment{
-    protected final GrimoireType TYPE; //The grimoire's type
+    protected final GrimoireType TYPE; //The grimoire's type+
+    protected String[] spellNames; //The names of the spells
+    protected String[] spellDescs; //The spells' descriptions
     
     public Grimoire(BufferedImage texture, String name, int ID, int[] statReqs, ArrayList<Characters> users, GrimoireType type) {
         super(texture, name, ID, statReqs, users);
@@ -33,7 +35,15 @@ public abstract class Grimoire extends Equipment{
             actor.setGrimoire(this);
     }
     
-    public GrimoireType getType(){
+    public GrimoireType getType() {
         return TYPE;
+    }
+
+    public String[] getSpellNames() {
+        return spellNames;
+    }
+
+    public String[] getSpellDescs() {
+        return spellDescs;
     }
 }

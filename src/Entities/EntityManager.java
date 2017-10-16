@@ -5,7 +5,7 @@
 */
 package Entities;
 
-import Entities.Creatures.Actors.PlayableActor.Player;
+import Entities.Creatures.Actors.PlayableActors.Player;
 import Main.Handler;
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -41,6 +41,11 @@ public class EntityManager {
         this.player = player;
         entities = new ArrayList<Entity>(); //Initialize entity list
         addEntity(player); //Add player to entity list
+    }
+    
+    public EntityManager(Handler handler){
+        this.handler = handler;
+        entities = new ArrayList<Entity>(); //Initialize entity list
     }
     
     public void tick(){

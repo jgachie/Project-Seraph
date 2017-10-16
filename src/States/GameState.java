@@ -5,7 +5,7 @@
  */
 package States;
 
-import Entities.Creatures.Actors.PlayableActor.Player;
+import Entities.Creatures.Actors.PlayableActors.Player;
 import Entities.Statics.Tree;
 import Main.Handler;
 import Worlds.World;

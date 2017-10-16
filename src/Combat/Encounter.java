@@ -5,6 +5,12 @@
  */
 package Combat;
 
+import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.Enemies.Goblin;
+import Main.Handler;
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * Encounters determine how many and what type of enemy the Player encounters. There are two types: 
  * Random encounters, which are triggered after the Player takes a certain number of steps, and will
@@ -14,5 +20,21 @@ package Combat;
  * @author Soup
  */
 public class Encounter {
+    private static Random dieRoll = new Random(); //A Random object for determining various outcomes
     
+    private Handler handler; //The handler
+    private ArrayList<Actor> enemyParty; //The enemy party
+    
+    public Encounter(Handler handler){
+        this.handler = handler;
+        enemyParty = new ArrayList<Actor>();
+        
+        enemyParty.add(new Goblin(handler));
+        
+        handler.setEncounter(this);
+    }
+    
+    public ArrayList<Actor> getParty(){
+        return enemyParty;
+    }
 }

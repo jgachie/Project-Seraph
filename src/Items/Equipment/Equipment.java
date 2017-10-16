@@ -5,7 +5,7 @@
  */
 package Items.Equipment;
 
-import Entities.Creatures.Actors.PlayableActor.PlayableActor;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Item;
 import Enums.Characters;
 import java.awt.image.BufferedImage;

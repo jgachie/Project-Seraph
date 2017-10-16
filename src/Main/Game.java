@@ -6,7 +6,7 @@
 package Main;
 
 import Display.Display;
-import Entities.Creatures.Actors.PlayableActor.Player;
+import Entities.Creatures.Actors.PlayableActors.Player;
 import Graphics.Assets;
 import Graphics.GameCamera;
 import Input.KeyManager;
@@ -81,7 +81,8 @@ public class Game implements Runnable{
         //State initialization
         gameState = new GameState(handler);
         menuState = new MenuState(handler);
-        State.setState(menuState); //Set current state to game state
+        State combatState = new CombatState(handler);
+        State.setState(combatState); //Set current state to game state
     }
     
     private void tick(){

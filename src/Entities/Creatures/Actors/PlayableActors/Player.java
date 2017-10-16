@@ -3,7 +3,7 @@
 * To change this template file, choose Tools | Templates
 * and open the template in the editor.
 */
-package Entities.Creatures.Actors.PlayableActor;
+package Entities.Creatures.Actors.PlayableActors;
 
 import Entities.Creatures.Actors.Actor;
 import Enums.Characters;
@@ -29,7 +29,7 @@ public class Player extends PlayableActor{
     
     public Player(Handler handler, float x, float y, String name){
         super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Characters.SARIEL,
-                Weapon.bareHands, 1, 100, 100, 100, 5, 5, 5, 5, 5, 5, 5, 5);
+                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 5, 5, 5, 5, 5, 5);
         
         //Set bounding box coordinates (relative to top-left corner of Player entity) and width/height
         bounds.x = 8;
@@ -178,7 +178,7 @@ public class Player extends PlayableActor{
         inv.setHandler(handler);
     }
     
-    public ArrayList getParty(){
+    public ArrayList<PlayableActor> getParty(){
         return party;
     }
 }

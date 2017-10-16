@@ -5,7 +5,7 @@
  */
 package Items.Tomes;
 
-import Entities.Creatures.Actors.PlayableActor.PlayableActor;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Equipment.Equipment;
 import Enums.Characters;
 import Enums.TomeType;
@@ -18,6 +18,8 @@ import java.util.ArrayList;
  */
 public abstract class Tome extends Equipment{
     protected final TomeType TYPE; //The tome's type
+    protected String[] skillNames; //The names of the spells
+    protected String[] skillDescs; //The spells' descriptions
     
     public Tome(BufferedImage texture, String name, int ID, int[] statReqs, ArrayList<Characters> users, TomeType type) {
         super(texture, name, ID, statReqs, users);
@@ -30,7 +32,15 @@ public abstract class Tome extends Equipment{
             actor.setTome(this);
     }
     
-    public TomeType getType(){
+    public TomeType getType() {
         return TYPE;
+    }
+
+    public String[] getSkillNames() {
+        return skillNames;
+    }
+
+    public String[] getSkillDescs() {
+        return skillDescs;
     }
 }

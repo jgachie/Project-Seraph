@@ -11,6 +11,7 @@ import Entities.Creatures.Creature;
 import Items.Equipment.Weapon;
 import Main.Handler;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -36,6 +37,7 @@ public abstract class Actor extends Creature{
     protected int maxHP; //Actor's max HP
     protected int mana; //How much mana the Actor has left
     protected int maxMP; //Actor's max MP
+    protected int exp = 0; //How much experience the Actor currently has
     protected int strength; //Actor's strength stat; determines power of physical attacks
     protected int dexterity; //Actor's dexterity stat; determines accuracy of physical attacks and resistance stats
     protected int wisdom; //Actor's wisdom stat; determines power of magical attacks and max MP
@@ -57,10 +59,11 @@ public abstract class Actor extends Creature{
     protected int freezeRes; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
     protected StatusEffect status; //The status effect Actor is currently afflicted by
     //Replace "status" with ArrayList of StatusEffects so an Actor can be afflicted by more than one status effect at a time
+    protected Runnable action; //A set of combat methods set during the takeTurn phase of combat and run during the action phase
     protected boolean alive = true; //Whether or not the Actor is alive
     
     protected Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
-            int level, int hitpoints, int mana, int strength, int dexterity, int wisdom, int intelligence,
+            int level, int hitpoints, int mana, int exp, int strength, int dexterity, int wisdom, int intelligence,
             int luck, int defense, int agility){
         super(handler, x, y, width, height);
         this.name = name;
@@ -70,6 +73,7 @@ public abstract class Actor extends Creature{
         this.maxHP = hitpoints;
         this.mana = mana;
         this.maxMP = mana;
+        this.exp = exp;
         this.strength = strength;
         this.dexterity = dexterity;
         this.wisdom = wisdom;
@@ -83,6 +87,14 @@ public abstract class Actor extends Creature{
         stunRes = 50;
         freezeRes = 50;
         status = StatusEffect.NONE;
+    }
+    
+    /**
+     * Runs the batch of methods in the Actor's action buffer for combat
+     */
+    public void takeTurn(){
+        if (action != null)
+            action.run();
     }
     
     //ATTACK METHODS
@@ -159,7 +171,7 @@ public abstract class Actor extends Creature{
     private int calcDamageReceived(int damage, DamageType type, StatusEffect effect){
         /*
         Defense doesn't affect damage reduction directly; increasing defense increases damage type defenses
-        (in addition to max hp), which in turn are used in damage reduction calculations
+        (in addition to max hp), which in takeTurn are used in damage reduction calculations
         */
         
         switch (type){
@@ -353,8 +365,6 @@ public abstract class Actor extends Creature{
         return null;
     }
     
-    public abstract void save();
-    
     //GETTERS/SETTERS
     
     public String getName() {
@@ -411,6 +421,14 @@ public abstract class Actor extends Creature{
     
     public void setMaxMP(int maxMP) {
         this.maxMP = maxMP;
+    }
+    
+    public int getExp() {
+        return exp;
+    }
+    
+    public void setExp(int exp) {
+        this.exp = exp;
     }
     
     public int getStrength() {
@@ -540,29 +558,45 @@ public abstract class Actor extends Creature{
     public void setLightningDef(int lightningDef) {
         this.lightningDef = lightningDef;
     }
-
+    
     public int getPoisonRes() {
         return poisonRes;
     }
-
+    
     public void setPoisonRes(int poisonRes) {
         this.poisonRes = poisonRes;
     }
-
+    
     public int getStunRes() {
         return stunRes;
     }
-
+    
     public void setStunRes(int stunRes) {
         this.stunRes = stunRes;
     }
-
+    
     public int getFreezeRes() {
         return freezeRes;
     }
-
+    
     public void setFreezeRes(int freezeRes) {
         this.freezeRes = freezeRes;
+    }
+    
+    public StatusEffect getStatus() {
+        return status;
+    }
+    
+    public void setStatus(StatusEffect status) {
+        this.status = status;
+    }
+    
+    public Runnable getAction() {
+        return action;
+    }
+    
+    public void setAction(Runnable action) {
+        this.action = action;
     }
     
     public boolean isAlive() {
@@ -571,13 +605,5 @@ public abstract class Actor extends Creature{
     
     public void setAlive(boolean alive) {
         this.alive = alive;
-    }
-
-    public StatusEffect getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusEffect status) {
-        this.status = status;
     }
 }

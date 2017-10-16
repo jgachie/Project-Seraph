@@ -5,7 +5,7 @@
 */
 package Items.Equipment;
 
-import Entities.Creatures.Actors.PlayableActor.PlayableActor;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Enums.StatusEffect;
 import Enums.Characters;
 import Enums.DamageType;
