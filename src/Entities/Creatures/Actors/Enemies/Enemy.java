@@ -6,9 +6,10 @@
 package Entities.Creatures.Actors.Enemies;
 
 import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Equipment.Weapon;
 import Main.Handler;
-import java.awt.Graphics;
+import java.util.ArrayList;
 
 /**
  *
@@ -23,5 +24,5 @@ public abstract class Enemy extends Actor{
                 wisdom, intelligence, luck, defense, agility);
     }
     
-    public abstract void decide();
+    public abstract void decide(ArrayList<PlayableActor> party);
 }

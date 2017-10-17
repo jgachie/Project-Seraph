@@ -5,8 +5,12 @@
 */
 package UI;
 
-import Entities.Creatures.Actors.Actor;
+import Graphics.Assets;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -14,13 +18,15 @@ import java.awt.image.BufferedImage;
  * @author Soup
  */
 public class UIImageButton extends UIObject{
-    private BufferedImage[] images; //The images associated with this button
+    private String text; //The text on the button
+    private BufferedImage image; //The image associated with this button; should change to a single image, since the image itself doesn't change anymore (the text does)
     private ClickListener clicker; //A click listener to handle click events
     
     public UIImageButton(String text, float x, float y, int width, int height, boolean visible,
-            BufferedImage[] images, ClickListener clicker){
-        super(text, x, y, width, height, visible);
-        this.images = images;
+            BufferedImage image, ClickListener clicker){
+        super(x, y, width, height, visible);
+        this.text = text;
+        this.image = image;
         this.clicker = clicker;
     }
     
@@ -33,11 +39,19 @@ public class UIImageButton extends UIObject{
     public void render(Graphics g) {
         //If the button is visible, render it; otherwise, do nothing
         if (visible){
-            //If the mouse is hovering over the button, draw the "selected" version of the button; otherwise, draw the normal version
+            g.setFont(new Font("Felix Titling", Font.BOLD, 20)); //Set the font of the String to be drawn
+            g.drawImage(image, (int) x, (int) y, width, height, null);
+            
+            //If the mouse is hovering over the button, draw the "selected" version of the text; otherwise, draw the normal version
             if (hovering)
-                g.drawImage(images[1], (int) x, (int) y, width, height, null);
+                g.setColor(Color.white);
             else
-                g.drawImage(images[0], (int) x, (int) y, width, height, null);
+                g.setColor(Color.black);
+            
+            
+            //All of the math here is responsible for centering the text in the button
+            g.drawString(text, (int) x + (width - g.getFontMetrics().stringWidth(text)) / 2,
+                    (int) y + ((height - g.getFontMetrics().getHeight()) / 2) + g.getFontMetrics().getAscent());
         }
     }
     

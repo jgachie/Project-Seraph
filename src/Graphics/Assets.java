@@ -16,12 +16,11 @@ public class Assets {
     private static final int T_WIDTH = 32, T_HEIGHT = 32; //Tile default width/height
     
     //Image assets
-    public static BufferedImage player, goblin, grass, water, stone, dirt, tree;
+    public static BufferedImage player, goblin, grass, water, stone, dirt, tree, btn, textBox;
     
     //Animation assets
     public static BufferedImage[] player_down, player_up, player_right, player_left;
     public static BufferedImage[] goblin_down, goblin_up, goblin_right, goblin_left;
-    public static BufferedImage[] btn_start;
     
     /**
      * Initialize all assets
@@ -40,6 +39,8 @@ public class Assets {
         stone = sheet.crop(T_WIDTH * 3, 0, T_WIDTH, T_HEIGHT);
         dirt = sheet.crop(T_WIDTH * 4, 0, T_WIDTH, T_HEIGHT);
         tree = sheet.crop(T_WIDTH * 5, 0, T_WIDTH, T_HEIGHT * 2);
+        btn = sheet.crop(192, 0, T_WIDTH * 4, T_HEIGHT * 2);
+        textBox = sheet.crop(0, 64, 1024, 300);
         
         //Initialize animations
         player_down = new BufferedImage[2];
@@ -51,8 +52,6 @@ public class Assets {
         goblin_up = new BufferedImage[2];
         goblin_right = new BufferedImage[4];
         goblin_left = new BufferedImage[4];
-        
-        btn_start = new BufferedImage[2];
         
         //Crop animations
         player_down[0] = seraph.cropCreature(0, 1);
@@ -86,8 +85,5 @@ public class Assets {
         goblin_left[1] = goblinSheet.cropCreature(3, 0);
         goblin_left[2] = goblinSheet.cropCreature(3, 2);
         goblin_left[3] = goblinSheet.cropCreature(3, 0);
-        
-        btn_start[0] = sheet.crop(T_WIDTH * 10, 0, T_WIDTH * 4, T_HEIGHT * 2);
-        btn_start[1] = sheet.crop(T_WIDTH * 6, 0, T_WIDTH * 4, T_HEIGHT * 2);
     }
 }

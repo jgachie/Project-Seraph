@@ -12,6 +12,7 @@ import Graphics.GameCamera;
 import Input.KeyManager;
 import Input.MouseManager;
 import States.*;
+import UI.UITextBox;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
@@ -83,6 +84,9 @@ public class Game implements Runnable{
         menuState = new MenuState(handler);
         State combatState = new CombatState(handler);
         State.setState(combatState); //Set current state to game state
+        
+        //Stream initializatoin
+        System.setOut(UITextBox.getStream()); //Redirect the system's PrintStream to the text box
     }
     
     private void tick(){

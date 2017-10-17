@@ -6,6 +6,7 @@
 package Combat;
 
 import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.Enemies.Goblin;
 import Main.Handler;
 import java.util.ArrayList;
@@ -23,18 +24,18 @@ public class Encounter {
     private static Random dieRoll = new Random(); //A Random object for determining various outcomes
     
     private Handler handler; //The handler
-    private ArrayList<Actor> enemyParty; //The enemy party
+    private ArrayList<Enemy> enemyParty; //The enemy party
     
     public Encounter(Handler handler){
         this.handler = handler;
-        enemyParty = new ArrayList<Actor>();
+        enemyParty = new ArrayList<Enemy>();
         
         enemyParty.add(new Goblin(handler));
         
         handler.setEncounter(this);
     }
     
-    public ArrayList<Actor> getParty(){
+    public ArrayList<Enemy> getParty(){
         return enemyParty;
     }
 }

@@ -14,15 +14,13 @@ import java.awt.event.MouseEvent;
  * @author Soup
  */
 public abstract class UIObject {
-    protected String text; //The text of the object
     protected float x, y; //Object coordinates
     protected int width, height; //Object width/height
     protected Rectangle bounds; //Bounding box for object
     protected boolean visible; //Whether the object is visible or not
     protected boolean hovering = false; //Whether or not the mouse is hovering over the object
     
-    public UIObject(String text, float x, float y, int width, int height, boolean visible){
-        this.text = text;
+    public UIObject(float x, float y, int width, int height, boolean visible){
         this.x = x;
         this.y = y;
         this.width = width;
@@ -60,14 +58,6 @@ public abstract class UIObject {
     }
     
     //GETTERS/SETTERS
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
     
     public float getX() {
         return x;

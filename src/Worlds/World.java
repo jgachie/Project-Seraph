@@ -7,6 +7,7 @@ package Worlds;
 
 import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Creatures.Actors.PlayableActors.Player;
 import Entities.EntityManager;
@@ -15,6 +16,7 @@ import Main.Handler;
 import Tiles.Tile;
 import UI.UIImageButton;
 import UI.UIManager;
+import UI.UITextBox;
 import Utils.Utils;
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -31,7 +33,8 @@ public class World {
     private int[][] tiles; //2D array tilemap containing IDs describing world in terms of tiles
     private EntityManager entityManager; //Manager for all entities in the world
     private UIManager uiManager; //Manager for all UI objects in the world
-    private UIImageButton attackButton, spellButton, skillButton, itemButton, fleeButton, backButton; //Action buttons
+    private UIImageButton attackButton, spellButton, skillButton, itemButton, fleeButton; //Action buttons
+    private UITextBox textBox; //The text box
     
     //Combat spawn coordinates for Player and enemy parties; Players always appear on left side of the screen, while enemies appear on the right
     private static final int PARTY_SPAWN_X = 100, ENEMY_SPAWN_X = 700;
@@ -50,7 +53,8 @@ public class World {
         entityManager.getPlayer().setY(spawnY);
     }
     
-    public World(Handler handler, String path, ArrayList<PlayableActor> party, ArrayList<Actor> enemyParty, Combat combat){
+    //Constructor for world creation during combat
+    public World(Handler handler, String path, ArrayList<PlayableActor> party, ArrayList<Enemy> enemyParty, Combat combat){
         this.handler = handler;
         this.combat = combat;
         
@@ -61,34 +65,28 @@ public class World {
             entityManager.addEntity(member);
         
         //Do the same for enemy party
-        for (Actor member : enemyParty)
+        for (Enemy member : enemyParty)
             entityManager.addEntity(member);
         
         uiManager = new UIManager(handler);
         handler.getMouseManager().setUIManager(uiManager); //Feed the manager through to the Mouse Manager to facilitate click and move events
         
-        loadWorld(path);
+        textBox = new UITextBox(0, handler.getHeight() - 300, 1024, 300, true, Assets.textBox); //Initialize the text box
         
-        //Set Player spawn points
+        //Set Player party spawn points
         for (int i = 0; i < party.size(); i++){
             party.get(i).setX(PARTY_SPAWN_X);
             party.get(i).setY(SPAWN_Y + (150 * i));
         }
         
-        //Set enemy spawn points
+        //Do the same for enemy party
         for (int i = 0; i < enemyParty.size(); i++){
             enemyParty.get(i).setX(ENEMY_SPAWN_X);
             enemyParty.get(i).setY(SPAWN_Y + (150 * i));
         }
         
-        /*
-        Add back button as its own button within each button's click method
-        
-        Figure out how to remove temporary buttons from UI Manager after they've been clicked
-        */
-        
-        //Set click action of attack button
-        attackButton = new UIImageButton("Attack", 50,  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+        //Initialize attack button
+        attackButton = new UIImageButton("Attack", 50,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -102,7 +100,7 @@ public class World {
                 
                 //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
                 if (enemy.isAlive()){
-                    uiManager.addObject(new UIImageButton(enemy.getName(), 50 + (150 * i),  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+                    uiManager.addObject(new UIImageButton(enemy.getName(), 50 + (150 * i),  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
                         //Load Actor's action buffer with method call
                         actor.setAction(() -> {
                             actor.attack(enemy); //Attack
@@ -111,14 +109,35 @@ public class World {
                         synchronized(combat){
                             combat.notifyAll(); //Let the combat thread know to move on
                         }
-                        uiManager.removeLast(); //Remove the object from the UI Manager
+                        
+                        //Remove all of the enemy buttons from the UI Manager
+                        for (int j = 0; j < enemyParty.size(); j++){
+                            uiManager.removeLast();
+                        }
+                        uiManager.removeLast(); //Remove one more, for some fucking reason
                     }));
                 }
             }
+            
+            //Create a back button so the Player can reverse their decision
+            int buttons = 0; //The number of enemy buttons on the screen right now
+            for (Enemy enemy : enemyParty){
+                if (enemy.isAlive())
+                    buttons++; //For every live enemy (and by extension, every enemy button on the screen), increment "buttons" by one
+            }
+            
+            int numButtons = buttons + 1; //Necessary because Java is fucking ridiculous; the total number of buttons on screen (including back button), used when removing buttons from UI Manager in back button
+            
+            uiManager.addObject(new UIImageButton("Back", 50 + (150 * buttons), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                for (int i = 0; i < numButtons; i++)
+                    uiManager.removeLast();
+                
+                showButtons();
+            }));
         });
         
-        //Set click action of spell button
-        spellButton = new UIImageButton("Cast Spell", 200,  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+        //Initialize spell button
+        spellButton = new UIImageButton("Cast Spell", 200,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -131,14 +150,14 @@ public class World {
             for (int i = 0; i < spellNames.length; i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
                 
-                uiManager.addObject(new UIImageButton(spellNames[index], 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+                uiManager.addObject(new UIImageButton(spellNames[index], 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
                     //Iterate through the enemy's party and create a button that refers to each one so the Player can select a target
                     for (int j = 0; j < enemyParty.size(); j++){
                         Actor enemy = enemyParty.get(j); //The enemy mapped to this button
                         
                         //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
                         if (enemy.isAlive()){
-                            uiManager.addObject(new UIImageButton(enemy.getName(), 50 + (150 * index),  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+                            uiManager.addObject(new UIImageButton(enemy.getName(), 50 + (150 * index),  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
                                 //Load Actor's action buffer with method call
                                 actor.setAction(() -> {
                                     actor.castSpell(enemy, index); //Cast spell
@@ -147,18 +166,47 @@ public class World {
                                 synchronized(combat){
                                     combat.notifyAll(); //Let the combat thread know to move on
                                 }
-                                uiManager.removeLast(); //Remove the object from the UI Manager
+                                
+                                //Remove all of the enemy buttons from the UI Manager
+                                for (int k = 0; k < enemyParty.size(); k++){
+                                    uiManager.removeLast();
+                                }
+                                uiManager.removeLast(); //Remove one more, for some fucking reason
                             }));
                         }
                     }
-                    uiManager.removeLast(); //Remove the object from the UI Manager
+                    
+                    //Create a back button so the Player can reverse their decision
+                    int buttons = 0; //The number of enemy buttons on the screen right now
+                    for (Enemy enemy : enemyParty){
+                        if (enemy.isAlive())
+                            buttons++; //For every live enemy (and by extension, every enemy button on the screen), increment "buttons" by one
+                    }
+                    
+                    int numButtons = buttons + 1; //Necessary because Java is fucking ridiculous; the total number of buttons on screen (including back button), used when removing buttons from UI Manager in back button
+                    
+                    uiManager.addObject(new UIImageButton("Back", 50 + (150 * buttons), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                        for (int j = 0; j < numButtons; j++)
+                            uiManager.removeLast();
+                        
+                        spellButton.onClick();
+                    }));
+                    
+                    uiManager.removeLast(); //Remove the button from the UI Manager
                 }));
             }
             
+            //Create a back button so the Player can reverse their decision
+            uiManager.addObject(new UIImageButton("Back", 50 + (150 * 6), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                for (int i = 0; i < 6; i++)
+                    uiManager.removeLast();
+                
+                showButtons();
+            }));
         });
         
-        //Set click action of skill button
-        skillButton = new UIImageButton("Use Skill", 350,  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+        //Initialize skill button
+        skillButton = new UIImageButton("Use Skill", 350,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -170,14 +218,14 @@ public class World {
             //Iterate through the Actor's Tome's skill names to create a button that refers to each one so the Player can select a skill
             for (int i = 0; i < skillNames.length; i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
-                uiManager.addObject(new UIImageButton(skillNames[index], 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+                uiManager.addObject(new UIImageButton(skillNames[index], 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
                     //Iterate through the enemy's party and create a button that refers to each one so the Player can select a target
                     for (int j = 0; j < enemyParty.size(); j++){
                         Actor enemy = enemyParty.get(j); //The enemy mapped to this button
                         
                         //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
                         if (enemy.isAlive()){
-                            uiManager.addObject(new UIImageButton(enemy.getName(), 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+                            uiManager.addObject(new UIImageButton(enemy.getName(), 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
                                 //Load Actor's action buffer with method call
                                 actor.setAction(() -> {
                                     actor.castSpell(enemy, index); //Cast spell
@@ -186,17 +234,47 @@ public class World {
                                 synchronized(combat){
                                     combat.notifyAll(); //Let the combat thread know to move on
                                 }
-                                uiManager.removeLast(); //Remove the object from the UI Manager
+                                
+                                //Remove all of the enemy buttons from the UI Manager
+                                for (int k = 0; k < enemyParty.size(); k++){
+                                    uiManager.removeLast();
+                                }
+                                uiManager.removeLast(); //Remove one more, for some fucking reason
                             }));
                         }
                     }
-                    uiManager.removeLast(); //Remove the object from the UI Manager
+                    
+                    //Create a back button so the Player can reverse their decision
+                    int buttons = 0; //The number of enemy buttons on the screen right now
+                    for (Enemy enemy : enemyParty){
+                        if (enemy.isAlive())
+                            buttons++; //For every live enemy (and by extension, every enemy button on the screen), increment "buttons" by one
+                    }
+                    
+                    int numButtons = buttons + 1; //Necessary because Java is fucking ridiculous; the total number of buttons on screen (including back button), used when removing buttons from UI Manager in back button
+                    
+                    uiManager.addObject(new UIImageButton("Back", 50 + (150 * buttons), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                        for (int j = 0; j < numButtons; j++)
+                            uiManager.removeLast();
+                        
+                        skillButton.onClick();
+                    }));
+                    
+                    uiManager.removeLast(); //Remove the button from the UI Manager
                 }));
             }
+            
+            //Create a back button so the Player can reverse their decision
+            uiManager.addObject(new UIImageButton("Back", 50 + (150 * 6), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                for (int i = 0; i < 6; i++)
+                    uiManager.removeLast();
+                
+                showButtons();
+            }));
         });
         
-        //Set click action of item button
-        itemButton = new UIImageButton("Use Item", 500,  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+        //Initialize item button
+        itemButton = new UIImageButton("Use Item", 500,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -204,8 +282,8 @@ public class World {
             //Implement this later
         });
         
-        //Set click action of flee button
-        fleeButton = new UIImageButton("Flee", 650,  handler.getHeight() - 150, 128, 64, true, Assets.btn_start, () -> {
+        //Initialize flee button
+        fleeButton = new UIImageButton("Flee", 650,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -213,11 +291,15 @@ public class World {
             //Also implement this later...
         });
         
+        //Add the buttons/text box to the UI Manager
+        uiManager.addObject(textBox);
         uiManager.addObject(attackButton);
         uiManager.addObject(spellButton);
         uiManager.addObject(skillButton);
         uiManager.addObject(itemButton);
         uiManager.addObject(fleeButton);
+        
+        loadWorld(path); //Load the world from the file
     }
     
     public void tick(){

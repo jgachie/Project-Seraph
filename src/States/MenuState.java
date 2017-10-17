@@ -30,7 +30,7 @@ public class MenuState extends State{
         create a subclass within the method call to satisfy it. Define the onClick() method to do whatever
         clicking on the button is supposed to do.
         */
-        uiManager.addObject(new UIImageButton("Start", 200, 200, 128, 64, true, Assets.btn_start, () -> {
+        uiManager.addObject(new UIImageButton("Start", 200, 200, 128, 64, true, Assets.btn, () -> {
             handler.getMouseManager().setUIManager(null); //Dispose of the MenuState's UI Manager
             State.setState(handler.getGame().getState("Game")); //When the button is clicked, start the game
         }));

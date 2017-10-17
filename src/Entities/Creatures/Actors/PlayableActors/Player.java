@@ -7,14 +7,17 @@ package Entities.Creatures.Actors.PlayableActors;
 
 import Entities.Creatures.Actors.Actor;
 import Enums.Characters;
-import Graphics.*;
+import Graphics.Animation;
+import Graphics.Assets;
 import Inventory.Inventory;
 import Items.Equipment.Weapon;
 import Main.Handler;
-import java.awt.*;
+import States.CombatState;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import States.State;
+import java.awt.Graphics;
 
 /**
  *
@@ -64,7 +67,7 @@ public class Player extends PlayableActor{
     
     /**
      * Removes a given PlayableActor from the Player's party.
-     * 
+     *
      * Note: As the Player must remain in the party at all times, attempting to remove the Player will
      * cause the method to return without doing anything
      * @param actor The PlayableActor being added to the party
@@ -80,8 +83,8 @@ public class Player extends PlayableActor{
     
     /**
      * Swaps the positions of two party members
-     * 
-     * Note: May remove this method later. Party positions really only determine the order in which 
+     *
+     * Note: May remove this method later. Party positions really only determine the order in which
      * each party member appears on the screen during combat, so this method has no practical use as
      * of yet
      * @param actor1 The first party member to be swapped
@@ -103,11 +106,15 @@ public class Player extends PlayableActor{
         walkLeft.tick();
         walkRight.tick();
         
+        //If the Player is currently engaged in combat, don't take in input for movement; just do nothing and return
+        if (State.getState() instanceof CombatState)
+            return;
+        
         //Movements
         getInput(); //Get Player input
         move(); //Apply input and move Player entity
         handler.getGameCamera().centerOnEntity(this); //Center camera on Player entity
-        inv.tick();
+        //inv.tick(); //Commented out for now; don't really know when (or even why) inventory should be ticked
     }
     
     /**
@@ -134,7 +141,7 @@ public class Player extends PlayableActor{
         //Subtract offset from position to focus camera on Player
         g.drawImage(getCurrentAnimationFrame(), (int) (x - handler.getGameCamera().getXOffset()),
                 (int) (y - handler.getGameCamera().getYOffset()), width, height, null);
-        inv.render(g);
+        //inv.render(g); //Commented out for now; don't really know when (or even why) inventory should be rendered
     }
     
     private BufferedImage getCurrentAnimationFrame(){

@@ -6,8 +6,10 @@
 package Combat;
 
 import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Main.Handler;
+import UI.UITextBox;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,10 +24,10 @@ public class Combat implements Runnable{
     private PlayableActor turn; //The PlayableActor whose turn it is currently
     private boolean ready = false; //Whether the combat thread is ready to receive button input or not
     private ArrayList<PlayableActor> party; //The Player's party
-    private ArrayList<Actor> enemyParty; //The enemy party
+    private ArrayList<Enemy> enemyParty; //The enemy party
     private ArrayList<Actor> actors; //All of the actors participating in the battle
     
-    public Combat(Handler handler, ArrayList<PlayableActor> party, ArrayList<Actor> enemyParty){
+    public Combat(Handler handler, ArrayList<PlayableActor> party, ArrayList<Enemy> enemyParty){
         this.handler = handler;
         this.party = party;
         this.enemyParty = enemyParty;
@@ -47,12 +49,11 @@ public class Combat implements Runnable{
         init(); //Initialize...stuff
         
         //Temporary; displays Actor info
+        UITextBox.resetBAOS();
         for (Actor actor : actors){
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~");
-            System.out.println(actor.getName());
+            System.out.print(actor.getName() + " - ");
             System.out.println("HP: " + actor.getHitpoints() + '/' + actor.getMaxHP());
-            System.out.println("MP: " + actor.getMana() + '/' + actor.getMaxMP());
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~\n");
+            System.out.println("MP: " + actor.getMana() + '/' + actor.getMaxMP() + "\n");
         }
         
         //While both parties have at least one living member each, run the combat logic
@@ -71,7 +72,9 @@ public class Combat implements Runnable{
                 }
             }
             
-            //Run enemy decision algorithm
+            for (Enemy member : enemyParty)
+                member.decide(party);
+                
             
             //Use a Comparator to sort the Actors in descending order of their agility stats to determine takeTurn order
             Collections.sort(actors, new Comparator<Actor>(){
@@ -87,6 +90,7 @@ public class Combat implements Runnable{
             //Iterate through the list of Actors and have each one take their turn
             for (Actor actor : actors)
                 actor.takeTurn();
+            
             /*
             Commented out for now; can't think of a reason to remove dead Actors from list of Actors (especially since Player still needs to see dead party member info)
             
@@ -110,12 +114,11 @@ public class Combat implements Runnable{
             
             */
             
+            UITextBox.resetBAOS();
             for (Actor actor : actors){
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~");
-                System.out.println(actor.getName());
+                System.out.print(actor.getName() + " - ");
                 System.out.println("HP: " + actor.getHitpoints() + '/' + actor.getMaxHP());
-                System.out.println("MP: " + actor.getMana() + '/' + actor.getMaxMP());
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~\n");
+                System.out.println("MP: " + actor.getMana() + '/' + actor.getMaxMP() + "\n");
             }
         }
         
@@ -157,7 +160,7 @@ public class Combat implements Runnable{
      */
     public boolean isEnemyAlive(){
         //Iterate through enemy party to see if there are any party members still alive
-        for (Actor member : enemyParty){
+        for (Enemy member : enemyParty){
             //If at least one party member is still alive, return true
             if (member.isAlive())
                 return true;
