@@ -63,6 +63,8 @@ public abstract class PlayableActor extends Actor{
         //I'll do this shit later
     }
     
+    //COMBAT METHODS
+    
     /**
      * Spellcasting method; determines type of equipped grimoire and calls its castSpell method
      * @param target The Actor being targeted
@@ -95,6 +97,10 @@ public abstract class PlayableActor extends Actor{
         }
     }
     
+    public void useItem(Actor target, int itemID){
+        //Will implement later
+    }
+    
     /**
      * Returns the Actor's stats in an array of integers
      * @return An array containing the Actor's stats
@@ -103,7 +109,15 @@ public abstract class PlayableActor extends Actor{
         return new int[]{strength, dexterity, wisdom, intelligence, luck, defense, agility, skill};
     }
     
-    public abstract void save();
+    //SERIALIZATION METHODS
+    
+    /**
+     * PlayableActor save method; calls the save supermethod with a specific filename, provided by value
+     * of PlayableActor's character
+     */
+    public void save(){
+        save(this, CHARACTER);
+    }
     
     //GETTERS/SETTERS
     

@@ -71,8 +71,8 @@ public class UITextBox extends UIObject{
     }
     
     /**
-     * 
-     * @return 
+     * Returns the contents of the ByteArrayOutputStream as a String so it can be printed to the text box
+     * @return A String containing the contents of the ByteArrayOutputStream
      */
     private String writeText(){
         return baos.toString();

@@ -8,10 +8,11 @@ package Entities.Creatures.Actors;
 import Enums.StatusEffect;
 import Enums.DamageType;
 import Entities.Creatures.Creature;
+import Enums.Characters;
 import Items.Equipment.Weapon;
 import Main.Handler;
+import UI.UITextBox;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -59,8 +60,9 @@ public abstract class Actor extends Creature{
     protected int freezeRes; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
     protected StatusEffect status; //The status effect Actor is currently afflicted by
     //Replace "status" with ArrayList of StatusEffects so an Actor can be afflicted by more than one status effect at a time
-    protected Runnable action; //A set of combat methods set during the takeTurn phase of combat and run during the action phase
+    protected transient Runnable action; //A set of combat methods set during the takeTurn phase of combat and run during the action phase
     protected boolean alive = true; //Whether or not the Actor is alive
+    protected boolean fleeing = false; //Whether or not the Actor is successfully fleeing (only to be screwed with during combat)
     
     protected Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
             int level, int hitpoints, int mana, int exp, int strength, int dexterity, int wisdom, int intelligence,
@@ -95,6 +97,46 @@ public abstract class Actor extends Creature{
     public void takeTurn(){
         if (action != null)
             action.run();
+    }
+    
+    /**
+     * Actor flee method; test against agility to see if flee attempt is successful.
+     */
+    public void flee(){
+        int chance = dieRoll.nextInt(100); //Roll for chance to flee
+        
+        /*
+        Determines flee success by a combination of die roll and agility. With base agility level of
+        5, initial chance to flee will be 65%. Agility efficacy gradually diminishes as stat level increases;
+        by level 25, it's half as effective, and by level 50, it's no longer a factor at all, and chances
+        of failing remain at a constant 4%.
+        */
+        
+        if (agility < 25){
+            if (chance <= 40 - dexterity)
+                fleeing = false;
+            else
+                fleeing = true;
+        }
+        else if (25 <= dexterity && dexterity < 50){
+            if (agility <= 28 - (dexterity / 2))
+                fleeing = false;
+            else
+                fleeing = true;
+        }
+        else if (dexterity >= 50){
+            if (agility <= 4)
+                fleeing = false;
+            else
+                fleeing = true;
+        }
+        
+        UITextBox.resetBAOS();
+        
+        if (fleeing)
+            System.out.println("You got away!");
+        else
+            System.out.println("You couldn't get away!");
     }
     
     //ATTACK METHODS
@@ -229,24 +271,24 @@ public abstract class Actor extends Creature{
         
         /*
         Determines hit success by a combination of die roll and dexterity. With base dexterity level
-        of 5, base chance to hit will be 55%. Dexterity efficacy gradually diminishes as stat level
+        of 5, base chance to hit will be 65%. Dexterity efficacy gradually diminishes as stat level
         increases; by level 25, it's half as effective, and by level 50, it's no longer a factor at
-        all, and chances of missing remain at a constant 14%.
+        all, and chances of missing remain at a constant 4%.
         */
         if (dexterity < 25){
-            if (accuracy <= 50 - dexterity)
+            if (accuracy <= 40 - dexterity)
                 hit = false;
             else
                 hit = true;
         }
         else if (25 <= dexterity && dexterity < 50){
-            if (accuracy <= 38 - (dexterity / 2))
+            if (accuracy <= 28 - (dexterity / 2))
                 hit = false;
             else
                 hit = true;
         }
         else if (dexterity >= 50){
-            if (accuracy <= 14)
+            if (accuracy <= 4)
                 hit = false;
             else
                 hit = true;
@@ -330,10 +372,11 @@ public abstract class Actor extends Creature{
     /**
      * Saves this version of an Actor to an object file
      * @param actor The Actor to be saved
+     * @param character The character of the actor
      */
-    protected void save(Actor actor, String name){
+    protected void save(Actor actor, Characters character){
         try{
-            fileOut = new FileOutputStream("ActorSaves/" + name);
+            fileOut = new FileOutputStream("ActorSaves/" + character.getValue());
             objectOut = new ObjectOutputStream(fileOut);
             objectOut.writeObject(actor);
             objectOut.close();
@@ -605,5 +648,13 @@ public abstract class Actor extends Creature{
     
     public void setAlive(boolean alive) {
         this.alive = alive;
+    }
+    
+    public boolean isFleeing() {
+        return fleeing;
+    }
+    
+    public void setFleeing(boolean fleeing) {
+        this.fleeing = fleeing;
     }
 }

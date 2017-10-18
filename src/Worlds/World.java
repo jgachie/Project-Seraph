@@ -288,7 +288,15 @@ public class World {
             if (!combat.isReady())
                 return;
             
-            //Also implement this later...
+            PlayableActor actor = combat.getTurn(); //Get the Actor whose turn it is currently
+            //Load Actor's action buffer with method call
+            actor.setAction(() -> {
+                actor.flee(); //Flee
+            });
+            showButtons(); //Show the combat buttons again for the next Actor's turn
+            synchronized(combat){
+                combat.notifyAll(); //Let the combat thread know to move on
+            }
         });
         
         //Add the buttons/text box to the UI Manager

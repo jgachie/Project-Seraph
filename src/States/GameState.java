@@ -28,7 +28,7 @@ public class GameState extends State{
     public void tick(){
         //Switch to menu state when scroll button is pressed
         if (handler.getMouseManager().isMiddlePressed())
-            State.setState(handler.getGame().getState("Menu"));
+            handler.getGame().setState("Menu");
         
         world.tick();
     }
@@ -36,5 +36,9 @@ public class GameState extends State{
     @Override
     public void render(Graphics g){
         world.render(g);
+    }
+    
+    public World getWorld(){
+        return world;
     }
 }

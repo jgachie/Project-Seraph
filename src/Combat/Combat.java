@@ -9,7 +9,9 @@ import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Main.Handler;
+import States.State;
 import UI.UITextBox;
+import com.sun.glass.ui.EventLoop;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,6 +59,7 @@ public class Combat implements Runnable{
         }
         
         //While both parties have at least one living member each, run the combat logic
+        combatLoop:
         while (isPartyAlive() && isEnemyAlive()){
             //Iterate through Player's party for each member's turn,
             for (PlayableActor member : party){
@@ -74,7 +77,7 @@ public class Combat implements Runnable{
             
             for (Enemy member : enemyParty)
                 member.decide(party);
-                
+            
             
             //Use a Comparator to sort the Actors in descending order of their agility stats to determine takeTurn order
             Collections.sort(actors, new Comparator<Actor>(){
@@ -87,42 +90,57 @@ public class Combat implements Runnable{
                 }
             });
             
-            //Iterate through the list of Actors and have each one take their turn
-            for (Actor actor : actors)
-                actor.takeTurn();
+            //Iterate through each Actor and, if they're alive, have them take their turn
+            for (Actor actor : actors){
+                if (actor.isAlive()){
+                    actor.takeTurn();
+                    if (actor.isFleeing())
+                        break combatLoop;
+                }
+                
+                //Print status of actors to screen
+                UITextBox.resetBAOS();
+                for (Actor actorr : actors){
+                    System.out.print(actorr.getName() + " - ");
+                    System.out.println("HP: " + actorr.getHitpoints() + '/' + actorr.getMaxHP());
+                    System.out.println("MP: " + actorr.getMana() + '/' + actorr.getMaxMP() + "\n");
+                }
+                
+                try{
+                    Thread.sleep(1000); //Sleep the thread for a short time so attacks aren't instantaneous; will be replaced by wait method later when animations are introduced
+                } catch (InterruptedException ex){
+                    ex.printStackTrace();
+                }
+            }
+            
+            
             
             /*
             Commented out for now; can't think of a reason to remove dead Actors from list of Actors (especially since Player still needs to see dead party member info)
             
             //Iterate through the Player's party and remove all the dead member from the list of Actors and re-add those that were revived
             for (PlayableActor member : party){
-                //If the member is now alive and isn't in the list, add them back; conversely, if the member is dead and is still in the list, remove them
-                if (member.isAlive() && !actors.contains(member))
-                    actors.add(member);
-                else if (!member.isAlive() && actors.contains(member))
-                    actors.remove(member);
+            //If the member is now alive and isn't in the list, add them back; conversely, if the member is dead and is still in the list, remove them
+            if (member.isAlive() && !actors.contains(member))
+            actors.add(member);
+            else if (!member.isAlive() && actors.contains(member))
+            actors.remove(member);
             }
             
             //Do the same for the enemy party
             for (Actor member : enemyParty){
-                //If the member is now alive and isn't in the list, add them back; conversely, if the member is dead and is still in the list, remove them
-                if (member.isAlive() && !actors.contains(member))
-                    actors.add(member);
-                else if (!member.isAlive() && actors.contains(member))
-                    actors.remove(member);
+            //If the member is now alive and isn't in the list, add them back; conversely, if the member is dead and is still in the list, remove them
+            if (member.isAlive() && !actors.contains(member))
+            actors.add(member);
+            else if (!member.isAlive() && actors.contains(member))
+            actors.remove(member);
             }
             
             */
             
-            UITextBox.resetBAOS();
-            for (Actor actor : actors){
-                System.out.print(actor.getName() + " - ");
-                System.out.println("HP: " + actor.getHitpoints() + '/' + actor.getMaxHP());
-                System.out.println("MP: " + actor.getMana() + '/' + actor.getMaxMP() + "\n");
-            }
         }
         
-        //If the Player won the battle, distribute each enemy's experience points to the entire party; if the Player lost, display a loss message and reload last saved game
+        //If the Player won the battle, distribute each enemy's experience points to the entire party, and save the state of each member
         if (isPartyAlive() && !isEnemyAlive()){
             for (PlayableActor member : party){
                 //Party members only gain experience if they're still alive at the end of the battle
@@ -130,10 +148,20 @@ public class Combat implements Runnable{
                     for (Actor enemy : enemyParty)
                         member.gainExp(enemy.getExp()); //Increase party member's experience by set enemy amount
                 }
+                
+                member.save(); //Save the state of the party member
             }
         }
+        //If the Player lost, display a loss message and reload last saved game
         else if (!isPartyAlive() && isEnemyAlive()){
             //Load the last saved game
+            
+        }
+        //If the Player (or the Enemy) fled, simply end combat
+        else{
+            //Save the state of each party member
+            for (PlayableActor member : party)
+                member.save();
         }
         
         stop(); //Combat is over, stop the thread
@@ -185,7 +213,8 @@ public class Combat implements Runnable{
      */
     public synchronized void start(){
         thread = new Thread(this);
-        handler.setCombat(thread); //Pass the thread through the handler
+        thread.setName("Combat Thread");
+        handler.setCombat(this); //Pass the combat object to the handler
         thread.start();
     }
     
@@ -194,6 +223,7 @@ public class Combat implements Runnable{
      */
     public synchronized void stop(){
         try{
+            handler.getGame().setState("Game");
             thread.join();
         } catch (InterruptedException ex){
             ex.printStackTrace();

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import States.State;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 
 /**
  *
@@ -100,15 +101,22 @@ public class Player extends PlayableActor{
     
     @Override
     public void tick(){
+        //If the Player is currently engaged in combat, don't take in input for movement; just do nothing and return
+        if (State.getState() instanceof CombatState)
+            return;
+        
+        //If enough steps have been taken, trigger the encounter and initiate combat
+        if (steps >= handler.getEncounter().getSteps()){
+            steps = 0; //Reset the number of steps
+            handler.getGame().setState("Combat"); //Start combat
+            handler.setEncounter(null); //After combat finishes, reset the encounter
+        }
+        
         //Tick animations
         walkDown.tick();
         walkUp.tick();
         walkLeft.tick();
         walkRight.tick();
-        
-        //If the Player is currently engaged in combat, don't take in input for movement; just do nothing and return
-        if (State.getState() instanceof CombatState)
-            return;
         
         //Movements
         getInput(); //Get Player input
@@ -134,10 +142,18 @@ public class Player extends PlayableActor{
             xMove = -speed;
         if (handler.getKeyManager().right)
             xMove = speed;
+        if (handler.getKeyManager().keyJustPressed(KeyEvent.VK_ENTER))
+            handler.getGame().setState("Pause");
     }
     
     @Override
     public void render(Graphics g){
+        //If the Player is currently engaged in combat, render the basic Player asset at a fixed position (so no need for camera offsets) and return
+        if (State.getState() instanceof CombatState){
+            g.drawImage(Assets.player, (int) (x), (int) (y), width, height, null);
+            return;
+        }
+            
         //Subtract offset from position to focus camera on Player
         g.drawImage(getCurrentAnimationFrame(), (int) (x - handler.getGameCamera().getXOffset()),
                 (int) (y - handler.getGameCamera().getYOffset()), width, height, null);
@@ -156,13 +172,6 @@ public class Player extends PlayableActor{
         else{
             return Assets.player;
         }
-    }
-    
-    /**
-     * Player-specific save method; calls the save supermethod with a specific filename
-     */
-    public void save(){
-        save(this, "Sariel");
     }
     
     /**

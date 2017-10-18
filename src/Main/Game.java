@@ -5,7 +5,9 @@
 */
 package Main;
 
+import Combat.Encounter;
 import Display.Display;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Creatures.Actors.PlayableActors.Player;
 import Graphics.Assets;
 import Graphics.GameCamera;
@@ -15,6 +17,7 @@ import States.*;
 import UI.UITextBox;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.InputMismatchException;
 
 /**
  *
@@ -33,8 +36,7 @@ public class Game implements Runnable{
     private Graphics g;
     
     //States
-    private State gameState;
-    private State menuState;
+    private State gameState, menuState, pauseState;
     
     //Input
     private KeyManager keyManager;
@@ -80,16 +82,20 @@ public class Game implements Runnable{
         new Player(handler, 0, 0, "Sariel").save();
         
         //State initialization
-        gameState = new GameState(handler);
         menuState = new MenuState(handler);
-        State combatState = new CombatState(handler);
-        State.setState(combatState); //Set current state to game state
+        gameState = new GameState(handler);
+        pauseState = new PauseState(handler);
+        State.setState(menuState); //Set current state to game state
         
         //Stream initializatoin
         System.setOut(UITextBox.getStream()); //Redirect the system's PrintStream to the text box
     }
     
     private void tick(){
+        //The handler doesn't currently have an encounter loaded, load one in
+        if (handler.getEncounter() == null)
+            handler.setEncounter(new Encounter(handler));
+        
         keyManager.tick();
         
         //Make sure current state isn't null before ticking
@@ -150,12 +156,38 @@ public class Game implements Runnable{
     
     public State getState(String state){
         switch (state.toUpperCase()){
-            case "GAME":
-                return gameState;
             case "MENU":
                 return menuState;
-            default:
+            case "GAME":
                 return gameState;
+            case "PAUSE":
+                return pauseState;
+            default:
+                throw new InputMismatchException(); //If you get here, you fucked up when trying to get the state
+        }
+    }
+    
+    public void setState(String state){
+        switch (state.toUpperCase()){
+            case "MENU":
+                State.setState(menuState);
+                break;
+            case "GAME":
+                if (handler.getWorld() != null){
+                    handler.getWorld().getEntityManager().setPlayer(Player.load(handler));
+                }
+                State.setState(gameState);
+                break;
+            case "PAUSE":
+                State.setState(pauseState);
+                break;
+            case "COMBAT":
+                for (PlayableActor member : handler.getWorld().getEntityManager().getPlayer().getParty())
+                    member.save();
+                State.setState(new CombatState(handler));
+                break;
+            default:
+                throw new InputMismatchException(); //If you get here, you fucked up when trying to set the state
         }
     }
     
@@ -212,12 +244,12 @@ public class Game implements Runnable{
 /*
 Notes
 
-                                        ***TO BE DONE***
+***TO BE DONE***
 
 * Three different stances: Offensive, defensive, and neutral. Offensive provides a boost to strength,
 dexterity, and wisdom, but reduces defense, evasion, and intelligence. Defensive does the exact opposite,
 while neutral maintains a balance between the stats. Stances can only be changed before battle (maybe);
-some attacks, spells, etc. require you to be in a certain stance in order to use them, while others 
+some attacks, spells, etc. require you to be in a certain stance in order to use them, while others
 might put you in a different stance after using them.
 
 * Sometimes, before a battle, a scene may play out in which the Player is presented with two or more
@@ -228,7 +260,7 @@ be taken lightly.
 
 * Throughout the story, the Player will be presented with options on the actions he/she may take, which
 eventually have an impact on the rest of the story. However, in some cases, having certain stat levels
-(particularly the Chaos stat; maybe the other stats as well) will restrict the options available to 
+(particularly the Chaos stat; maybe the other stats as well) will restrict the options available to
 the Player, and sometimes even force them to choose a specific option. For example, at one point the
 Player may be presented with the opportunity to spare an enemy or kill it mercilessly, but if his/her
 Chaos stat is too high, the Player will be forced to slay the enemy.
@@ -246,7 +278,7 @@ When equipped, it reduces the Player's Chaos stat by 8, and has the hidden effec
 Chaos levels from making decisions for the Player.
 
 
-                                        ***TO BE DECIDED***
+***TO BE DECIDED***
 
 * Make Rynn a man.
 

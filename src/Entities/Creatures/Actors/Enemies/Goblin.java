@@ -23,7 +23,7 @@ public class Goblin extends Enemy{
     private static Random dieRoll = new Random(); //A Radnom object for deciding outcomes
     
     public Goblin(Handler handler){
-        super(handler, 0, 0, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, "Goblin", Weapon.broadsword,
+        super(handler, 0, 0, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, "Goblin", Weapon.bareHands,
                 1, 100, 0, 50, 5, 5, 5, 5, 5, 5, 5);
         
         //Set bounding box coordinates (relative to top-left corner of entity) and width/height
@@ -49,7 +49,6 @@ public class Goblin extends Enemy{
     
     @Override
     public void render(Graphics g) {
-        g.drawImage(Assets.goblin, (int) (x - handler.getGameCamera().getXOffset()),
-                (int) (y - handler.getGameCamera().getYOffset()), width, height, null);
+        g.drawImage(Assets.goblin, (int) (x), (int) (y), width, height, null);
     }
 }

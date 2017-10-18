@@ -31,8 +31,7 @@ public class MenuState extends State{
         clicking on the button is supposed to do.
         */
         uiManager.addObject(new UIImageButton("Start", 200, 200, 128, 64, true, Assets.btn, () -> {
-            handler.getMouseManager().setUIManager(null); //Dispose of the MenuState's UI Manager
-            State.setState(handler.getGame().getState("Game")); //When the button is clicked, start the game
+            handler.getGame().setState("Game"); //When the button is clicked, start the game
         }));
     }
     

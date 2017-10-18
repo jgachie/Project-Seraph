@@ -11,9 +11,19 @@ package Enums;
  * @author Soup
  */
 public enum Characters {
-    SARIEL,
-    ZANNA,
-    RYNN,
-    THERON,
-    RIBEL;
+    SARIEL("Sariel"),
+    ZANNA("Zanna"),
+    RYNN("Rynn"),
+    THERON("Theron"),
+    RIBEL("Ribel");
+    
+    private String value; //The value of each enum; should be a String containing the base name of the character
+    
+    private Characters(String value){
+        this.value = value;
+    }
+    
+    public String getValue(){
+        return value;
+    }
 }

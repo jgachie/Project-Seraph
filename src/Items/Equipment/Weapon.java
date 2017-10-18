@@ -24,9 +24,9 @@ public class Weapon extends Equipment{
     //Hard-code all different types of weapons here
     public static Weapon[] weapons = new Weapon[256];
     public static Weapon bareHands = new Weapon(Assets.stone, "Bare Hands", 0, new int[]{1, 1, 1, 1, 1, 1, 1, 1},
-            1, 3, DamageType.CRUSH, Characters.SARIEL, Characters.ZANNA, Characters.RYNN, Characters.RIBEL);
+            3, 6, DamageType.CRUSH, Characters.SARIEL, Characters.ZANNA, Characters.RYNN, Characters.RIBEL);
     public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", 1, new int[]{3, 2, 1, 1, 1, 1, 1, 1},
-            3, 6, DamageType.SLASH, Characters.SARIEL, Characters.ZANNA, Characters.RYNN, Characters.RIBEL);
+            6, 9, DamageType.SLASH, Characters.SARIEL, Characters.ZANNA, Characters.RYNN, Characters.RIBEL);
     
     //Class
     protected final int minDamage, maxDamage; //The lowest and highest amounts of damage the weapon itself can deal

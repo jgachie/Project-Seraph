@@ -5,6 +5,7 @@
 */
 package Main;
 
+import Combat.Combat;
 import Combat.Encounter;
 import Graphics.GameCamera;
 import Input.KeyManager;
@@ -18,7 +19,7 @@ import Worlds.World;
 public class Handler {
     private Game game; //The game itself
     private World world; //The world
-    private Thread combat; //The thread that combat is running on
+    private Combat combat; //The thread that combat is running on
     private Encounter encounter; //The next encounter
     
     public Handler(Game game){
@@ -61,11 +62,11 @@ public class Handler {
         this.world = world;
     }
     
-    public Thread getCombat(){
+    public Combat getCombat(){
         return combat;
     }
     
-    public void setCombat(Thread combat){
+    public void setCombat(Combat combat){
         this.combat = combat;
     }
     

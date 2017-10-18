@@ -25,17 +25,23 @@ public class Encounter {
     
     private Handler handler; //The handler
     private ArrayList<Enemy> enemyParty; //The enemy party
+    private int steps; //The number of steps (tiles) the Player must walk until the encounter triggers
     
     public Encounter(Handler handler){
         this.handler = handler;
-        enemyParty = new ArrayList<Enemy>();
+        this.enemyParty = new ArrayList<Enemy>();
+        this.steps = dieRoll.nextInt(26) + 5; //Set the number of steps until the encounter is triggered (anywhere between 5 and 30)
         
         enemyParty.add(new Goblin(handler));
-        
-        handler.setEncounter(this);
     }
+    
+    //GETTERS/SETTERS
     
     public ArrayList<Enemy> getParty(){
         return enemyParty;
+    }
+    
+    public int getSteps(){
+        return steps;
     }
 }
