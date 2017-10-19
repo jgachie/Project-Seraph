@@ -9,9 +9,7 @@ import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Main.Handler;
-import States.State;
 import UI.UITextBox;
-import com.sun.glass.ui.EventLoop;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,6 +19,8 @@ import java.util.Comparator;
  * @author Soup
  */
 public class Combat implements Runnable{
+    private static final int DELAY = 1500; //The length of the delay between displaying messages and taking turns
+    
     private Handler handler; //The handler
     private Thread thread; //Combat thread
     private PlayableActor turn; //The PlayableActor whose turn it is currently
@@ -37,6 +37,10 @@ public class Combat implements Runnable{
     }
     
     public void init(){
+        //Run through Player's party and save all of their stats to account for combat modifications
+        for (PlayableActor member : party)
+            member.saveStats();
+        
         //Iterate through Player's party and add them to the list of Actors
         for (Actor actor : party)
             actors.add(actor);
@@ -94,6 +98,9 @@ public class Combat implements Runnable{
             for (Actor actor : actors){
                 if (actor.isAlive()){
                     actor.takeTurn();
+                    
+                    delay();
+                    
                     if (actor.isFleeing())
                         break combatLoop;
                 }
@@ -104,12 +111,6 @@ public class Combat implements Runnable{
                     System.out.print(actorr.getName() + " - ");
                     System.out.println("HP: " + actorr.getHitpoints() + '/' + actorr.getMaxHP());
                     System.out.println("MP: " + actorr.getMana() + '/' + actorr.getMaxMP() + "\n");
-                }
-                
-                try{
-                    Thread.sleep(1000); //Sleep the thread for a short time so attacks aren't instantaneous; will be replaced by wait method later when animations are introduced
-                } catch (InterruptedException ex){
-                    ex.printStackTrace();
                 }
             }
             
@@ -140,6 +141,10 @@ public class Combat implements Runnable{
             
         }
         
+        //Run through Player's party and reload each member's original, unmodified stats
+        for (PlayableActor member : party)
+            member.loadStats();
+        
         //If the Player won the battle, distribute each enemy's experience points to the entire party, and save the state of each member
         if (isPartyAlive() && !isEnemyAlive()){
             for (PlayableActor member : party){
@@ -165,6 +170,18 @@ public class Combat implements Runnable{
         }
         
         stop(); //Combat is over, stop the thread
+    }
+    
+    /**
+     * Sleeps the thread for the duration of the combat delay; used so that combat calculations and
+     * outcomes aren't displayed all at once
+     */
+    public static void delay(){
+        try{
+            Thread.sleep(DELAY);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
     }
     
     /**
@@ -196,7 +213,6 @@ public class Combat implements Runnable{
         
         return false; //If all party members are dead, return false
     }
-    
     
     //GETTERS/SETTERS
     

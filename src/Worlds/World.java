@@ -13,6 +13,7 @@ import Entities.Creatures.Actors.PlayableActors.Player;
 import Entities.EntityManager;
 import Graphics.Assets;
 import Main.Handler;
+import Spells.Spell;
 import Tiles.Tile;
 import UI.UIImageButton;
 import UI.UIManager;
@@ -143,14 +144,15 @@ public class World {
                 return;
             
             PlayableActor actor = (PlayableActor) combat.getTurn(); //Get the Actor whose turn it is currently
-            String[] spellNames = actor.getGrimoire().getSpellNames(); //The names of the spells in the Actor's currently equipped grimoire
+            ArrayList<Spell> spells = actor.getGrimoire().getSpells(); //The names of the spells in the Actor's currently equipped grimoire
             hideButtons(); //Hide the combat buttons
             
             //Iterate through the Actor's Grimoire's spell names to create a button that refers to each one so the Player can select a spell
-            for (int i = 0; i < spellNames.length; i++){
+            for (int i = 0; i < spells.size(); i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
                 
-                uiManager.addObject(new UIImageButton(spellNames[index], 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                uiManager.addObject(new UIImageButton(spells.get(index).getName(), 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                    
                     //Iterate through the enemy's party and create a button that refers to each one so the Player can select a target
                     for (int j = 0; j < enemyParty.size(); j++){
                         Actor enemy = enemyParty.get(j); //The enemy mapped to this button
@@ -191,13 +193,12 @@ public class World {
                         
                         spellButton.onClick();
                     }));
-                    
                     uiManager.removeLast(); //Remove the button from the UI Manager
                 }));
             }
             
             //Create a back button so the Player can reverse their decision
-            uiManager.addObject(new UIImageButton("Back", 50 + (150 * 6), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+            uiManager.addObject(new UIImageButton("Back", 50 + (150 * 5), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
                 for (int i = 0; i < 6; i++)
                     uiManager.removeLast();
                 

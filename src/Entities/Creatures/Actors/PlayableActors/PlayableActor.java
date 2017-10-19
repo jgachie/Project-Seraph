@@ -12,9 +12,10 @@ import Items.Tomes.Tome;
 import Main.Handler;
 import Enums.Stance;
 import Enums.Characters;
+import java.util.ArrayList;
 
 /**
- * PlayableActors are Actors that the player actually controls (i.e. Zanna; Rynn; the player character himself)
+ * PlayableActors are Actors that the player actually controls (i.e. Zanna; Rynn; the player character him/herself)
  * @author Soup
  */
 public abstract class PlayableActor extends Actor{
@@ -26,16 +27,22 @@ public abstract class PlayableActor extends Actor{
     protected Grimoire grimoire; //Actor's currently equipped grimoire; determines which spells Actor can use in battle
     protected Tome tome; //Actor's currently equipped tome; determines which skills Actor can use in battle
     protected final Characters CHARACTER; //The Actor's character value (Sariel, Zanna, Rynn, etc.); determines which equipment the Actor can use, among other things
+    protected ArrayList<PlayableActor> party; //The Actor's party
+    private int[] statSave; //An array holding the Actor's original, unmodified stats before entering combat
     
     protected PlayableActor(Handler handler, float x, float y, int width, int height, String name, Characters character,
             Weapon weapon, int level, int hitpoints, int mana, int skillpoints, int exp, int strength,
-            int dexterity, int wisdom, int intelligence, int luck, int defense, int agility, int skill) {
+            int dexterity, int wisdom, int intelligence, int luck, int defense, int agility, int skill,
+            ArrayList<PlayableActor> party) {
         super(handler, x, y, width, height, name, weapon, level, hitpoints, mana, exp, strength, dexterity,
                 wisdom, intelligence, luck, defense, agility);
         this.CHARACTER = character;
         this.skillpoints = skillpoints;
         this.maxSP = skillpoints;
         this.skill = skill;
+        this.party = party;
+        this.statSave = new int[8];
+        this.grimoire = Grimoire.basicGrimoire;
         
         //Standard initializations
         stance = Stance.NEUTRAL;
@@ -71,14 +78,7 @@ public abstract class PlayableActor extends Actor{
      * @param spellNum The ordinal number of the spell being cast (should be between 1 and 5)
      */
     public void castSpell(Actor target, int spellNum){
-        //Determine the type of the equipped grimoire and cast "grimoire" to that type before calling castSpell method
-        switch (grimoire.getType()){
-            case BASIC:
-                break;
-            default:
-                //Shouldn't ever get here; if you do, FUCKING PANIC
-                break;
-        }
+        grimoire.getSpells().get(spellNum).cast(this, target);
     }
     
     /**
@@ -97,8 +97,84 @@ public abstract class PlayableActor extends Actor{
         }
     }
     
+    /**
+     * Tests dexterity and skill against given base chance of success to determine whether a skill hits
+     * or not
+     * @param baseChance The skill's base chance of success
+     * @return True if the skill hit; false if it missed
+     */
+    private boolean skillHit(int baseChance){
+        //Will implement later
+        return true;
+    }
+    
     public void useItem(Actor target, int itemID){
         //Will implement later
+    }
+    
+    /**
+     * Increases or decreases a given stat by a given amount
+     * @param stat The name of the stat to be modified
+     * @param modify The amount of points by which the stat is to be modified
+     */
+    public void modifyStat(String stat, int modify){
+        switch (stat.toUpperCase()){
+            case "STRENGTH":
+                strength += modify;
+                break;
+            case "DEXTERITY":
+                dexterity += modify;
+                break;
+            case "WISDOM":
+                wisdom += modify;
+                break;
+            case "INTELLIGENCE":
+                intelligence += modify;
+                break;
+            case "LUCK":
+                luck += modify;
+                break;
+            case "DEFENSE":
+                defense += modify;
+                break;
+            case "AGILITY":
+                agility += modify;
+                break;
+            case "SKILL":
+                skill += modify;
+                break;
+            default:
+                //Should never get here; if you do, FUCKING PANIC
+                break;
+        }
+    }
+    
+    /**
+     * Saves the Actor's unmodified stats into an array before starting combat
+     */
+    public void saveStats(){
+        statSave[0] = strength;
+        statSave[1] = dexterity;
+        statSave[2] = wisdom;
+        statSave[3] = intelligence;
+        statSave[4] = luck;
+        statSave[5] = defense;
+        statSave[6] = agility;
+        statSave[7] = skill;
+    }
+    
+    /**
+     * Loads the Actor's unmodified stats from the saved array after ending combat
+     */
+    public void loadStats(){
+        strength = statSave[0];
+        dexterity = statSave[1];
+        wisdom = statSave[2];
+        intelligence = statSave[3];
+        luck = statSave[4];
+        defense = statSave[5];
+        agility = statSave[6];
+        skill = statSave[7];
     }
     
     /**
@@ -175,6 +251,14 @@ public abstract class PlayableActor extends Actor{
     
     public void setTome(Tome tome){
         this.tome = tome;
+    }
+
+    public ArrayList<PlayableActor> getParty() {
+        return party;
+    }
+
+    public void setParty(ArrayList<PlayableActor> party) {
+        this.party = party;
     }
     
     public Characters getCharacter(){

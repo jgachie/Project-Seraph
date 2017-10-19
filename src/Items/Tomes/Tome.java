@@ -11,6 +11,7 @@ import Enums.Characters;
 import Enums.TomeType;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * An empty abstract class purely for inheritance purposes (may replace with interface later on)
@@ -21,8 +22,8 @@ public abstract class Tome extends Equipment{
     protected String[] skillNames; //The names of the spells
     protected String[] skillDescs; //The spells' descriptions
     
-    public Tome(BufferedImage texture, String name, int ID, int[] statReqs, ArrayList<Characters> users, TomeType type) {
-        super(texture, name, ID, statReqs, users);
+    public Tome(BufferedImage texture, String name, String ID, int[] statReqs, TomeType type, Characters... users) {
+        super(texture, name, ID, statReqs, new ArrayList<Characters>(Arrays.asList(users)));
         this.TYPE = type;
     }
     

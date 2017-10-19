@@ -20,14 +20,15 @@ public abstract class Item implements Serializable{
     protected transient Handler handler; //The handler object
     protected static BufferedImage texture; //The image used to represent the item
     protected String name; //The name of the item
-    protected final int ID; //An ID unique to each type of item
+    protected final String ID; //An ID unique to each type of item; the first character should be a char, denoting the type of item, followed by a number denoting its ID
     
-    protected int count; //The x-coordinate, y-coordinate, and quantity of the item that the player currently has in their inventory
+    protected int numHeld; //The quantity of the item that the player currently has in their inventory
     
-    public Item(BufferedImage texture, String name, int ID){
+    public Item(BufferedImage texture, String name, String ID){
+        this.handler = handler;
         this.texture = texture;
         this.name = name;
         this.ID = ID;
-        count = 1;
+        numHeld = 0;
     }
 }

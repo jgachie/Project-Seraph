@@ -28,12 +28,11 @@ public class Player extends PlayableActor{
     //Declare animations (must be static for serialization)
     private static Animation walkDown, walkUp, walkLeft, walkRight;
     
-    private ArrayList<PlayableActor> party; //The Player's party
     private Inventory inv; //The Player's inventory
     
     public Player(Handler handler, float x, float y, String name){
         super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Characters.SARIEL,
-                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 5, 5, 5, 5, 5, 5);
+                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 5, 5, 5, 5, 5, 5, new ArrayList<PlayableActor>());
         
         //Set bounding box coordinates (relative to top-left corner of Player entity) and width/height
         bounds.x = 8;
@@ -49,8 +48,7 @@ public class Player extends PlayableActor{
         
         //Initialize other shit
         inv = new Inventory(handler);
-        party = new ArrayList<PlayableActor>();
-        party.add(this);
+        party.add(this); //Add the player to the party
     }
     
     /**
@@ -192,9 +190,5 @@ public class Player extends PlayableActor{
     private void setHandler(Handler handler){
         this.handler = handler;
         inv.setHandler(handler);
-    }
-    
-    public ArrayList<PlayableActor> getParty(){
-        return party;
     }
 }

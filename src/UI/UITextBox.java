@@ -27,12 +27,10 @@ public class UITextBox extends UIObject{
     private static PrintStream oldStream = System.out; //The old PrintStream
     
     private BufferedImage image; //The image of the text box itself
-    private Graphics2D g2; //A Graphics2D object to hold the BufferedImage's graphics
     
     public UITextBox(float x, float y, int width, int height, boolean visible, BufferedImage image) {
         super(x, y, width, height, visible);
         this.image = image;
-        this.g2 = image.createGraphics();
     }
     
     @Override

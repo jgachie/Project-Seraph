@@ -10,8 +10,7 @@ import Enums.StatusEffect;
 import Enums.Characters;
 import Enums.DamageType;
 import Graphics.Assets;
-import Items.Item;
-import Items.Item;
+import Main.Handler;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,17 +22,17 @@ import java.util.Arrays;
 public class Weapon extends Equipment{
     //Hard-code all different types of weapons here
     public static Weapon[] weapons = new Weapon[256];
-    public static Weapon bareHands = new Weapon(Assets.stone, "Bare Hands", 0, new int[]{1, 1, 1, 1, 1, 1, 1, 1},
-            3, 6, DamageType.CRUSH, Characters.SARIEL, Characters.ZANNA, Characters.RYNN, Characters.RIBEL);
-    public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", 1, new int[]{3, 2, 1, 1, 1, 1, 1, 1},
-            6, 9, DamageType.SLASH, Characters.SARIEL, Characters.ZANNA, Characters.RYNN, Characters.RIBEL);
+    public static Weapon bareHands = new Weapon(Assets.stone, "Bare Hands", "W001", new int[]{1, 1, 1, 1, 1, 1, 1, 1},
+            3, 6, DamageType.CRUSH);
+    public static Weapon broadsword = new Weapon(Assets.stone, "Broadsword", "W002", new int[]{3, 2, 1, 1, 1, 1, 1, 1},
+            6, 9, DamageType.SLASH);
     
     //Class
     protected final int minDamage, maxDamage; //The lowest and highest amounts of damage the weapon itself can deal
     protected final DamageType type; //The type of damage the weapon deals
     protected final StatusEffect effect; //The type of status effect the weapon deals, if any at all
     
-    private Weapon(BufferedImage texture, String name, int ID, int[] statReqs, int minDamage, int maxDamage,
+    private Weapon(BufferedImage texture, String name, String ID, int[] statReqs, int minDamage, int maxDamage,
             DamageType type, StatusEffect effect, Characters... users) {
         super(texture, name, ID, statReqs, new ArrayList<Characters>(Arrays.asList(users))); //Last argument takes users array and transforms it into an ArrayList for functionality
         this.minDamage = minDamage;
@@ -42,7 +41,7 @@ public class Weapon extends Equipment{
         this.effect = effect;
     }
     
-    private Weapon(BufferedImage texture, String name, int ID, int[] statReqs, int minDamage, int maxDamage,
+    private Weapon(BufferedImage texture, String name, String ID, int[] statReqs, int minDamage, int maxDamage,
             DamageType type, Characters... users){
         super(texture, name, ID, statReqs, new ArrayList<Characters>(Arrays.asList(users))); //Last argument takes users array and transforms it into an ArrayList for functionality
         this.minDamage = minDamage;

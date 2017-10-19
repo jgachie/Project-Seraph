@@ -1,13 +1,14 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Items.Equipment;
 
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Item;
 import Enums.Characters;
+import Main.Handler;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -20,7 +21,7 @@ public abstract class Equipment extends Item{
     protected final int[] STATREQS; //The stat requirements for equipping this weapon; order of stats is Strength, Dexterity, Wisdom, Intelligence, Luck, Defense, Evasion, Skill
     
     
-    public Equipment(BufferedImage texture, String name, int ID, int[] statReqs, ArrayList<Characters> users) {
+    public Equipment(BufferedImage texture, String name, String ID, int[] statReqs, ArrayList<Characters> users) {
         super(texture, name, ID);
         this.STATREQS = statReqs;
         this.USERS = users;
@@ -56,7 +57,12 @@ public abstract class Equipment extends Item{
      * @return True if the character can equip it; false if otherwise
      */
     protected boolean checkChar(Characters character){
-        //Check the given character against the list of valid characters. If the character is valid, return true; otherwise, return false
-        return USERS.stream().anyMatch((person) -> (character == person));
+        //If the user list is empty, this means anyone can use this piece of equipment, so return true
+        if (USERS.isEmpty())
+            return true;
+        
+        //Otherwise, check the given character against the list of valid characters. If the character is valid, return true; otherwise, return false
+        else
+            return USERS.stream().anyMatch((person) -> (character == person));
     }
 }

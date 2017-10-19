@@ -5,6 +5,7 @@
 */
 package Entities.Creatures.Actors;
 
+import Combat.Combat;
 import Enums.StatusEffect;
 import Enums.DamageType;
 import Entities.Creatures.Creature;
@@ -13,6 +14,7 @@ import Items.Equipment.Weapon;
 import Main.Handler;
 import UI.UITextBox;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -104,7 +106,6 @@ public abstract class Actor extends Creature{
      */
     public void flee(){
         int chance = dieRoll.nextInt(100); //Roll for chance to flee
-        
         /*
         Determines flee success by a combination of die roll and agility. With base agility level of
         5, initial chance to flee will be 65%. Agility efficacy gradually diminishes as stat level increases;
@@ -148,18 +149,28 @@ public abstract class Actor extends Creature{
      */
     public void attack(Actor target){
         int damage;
+        UITextBox.resetBAOS();
+        System.out.println(name + " prepares to attack...\n");
+        Combat.delay();
         
         //If the attack misses, return; otherwise, calculate initial damage dealt and then apply defense modifiers
-        if (!attackHit())
+        if (!attackHit()){
+            System.out.println(name + " missed!");
             return;
+        }
         else{
             damage = calcAttackDamage();
             damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
         }
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
-        if (damage > 0)
+        if (damage > 0){
+            System.out.println("...The attack hit!");
+            System.out.println(target.name + " took " + damage + " damage!");
             target.dealDamage(damage);
+        }
+        else
+            System.out.println("..." + target.getName() + " blocked the attack!");
     }
     
     /**
@@ -173,7 +184,7 @@ public abstract class Actor extends Creature{
      * critical.
      * @return The amount of damage dealt
      */
-    private int calcAttackDamage(){
+    public int calcAttackDamage(){
         int baseDamage; //The base damage of the weapon
         int damage = 0; //The amount of damage dealt
         
@@ -188,12 +199,10 @@ public abstract class Actor extends Creature{
         
         if (strength < 25)
             damage = (int) (baseDamage * (strength / 5.0));
-        else if (25 <= strength && strength < 50){
+        else if (25 <= strength && strength < 50)
             damage = (int) (baseDamage * (strength / 10.0) + (baseDamage * 2.4));
-        }
-        else if (strength > 50){
+        else if (strength > 50)
             damage = (int) (baseDamage * (strength / 20.0) + (baseDamage * 4.9));
-        }
         
         //If the attack was critical, multiply the damage by 1.5
         if (attackCrit())
@@ -210,7 +219,7 @@ public abstract class Actor extends Creature{
      * @param effect The status effect to be inflicted
      * @return The total damage received by the Actor
      */
-    private int calcDamageReceived(int damage, DamageType type, StatusEffect effect){
+    public int calcDamageReceived(int damage, DamageType type, StatusEffect effect){
         /*
         Defense doesn't affect damage reduction directly; increasing defense increases damage type defenses
         (in addition to max hp), which in takeTurn are used in damage reduction calculations
@@ -245,20 +254,6 @@ public abstract class Actor extends Creature{
             statusHit(effect);
         
         return damage;
-    }
-    
-    /**
-     * Takes calculated damage and subtracts it from Actor's hitpoints
-     * @param damage The amount of damage dealt
-     */
-    private void dealDamage(int damage){
-        hitpoints -= damage; //Subract damage from Actor's hitpoints
-        
-        //If the Actor's hitpoints fall to or below 0, the Actor is dead
-        if (hitpoints <= 0){
-            hitpoints = 0;
-            alive = false;
-        }
     }
     
     /**
@@ -365,6 +360,32 @@ public abstract class Actor extends Creature{
                 //Shouldn't ever get here; if you do, FUCKING PANIC
                 break;
         }
+    }
+    
+    /**
+     * Takes calculated damage and subtracts it from Actor's hitpoints
+     * @param damage The amount of damage dealt
+     */
+    public void dealDamage(int damage){
+        hitpoints -= damage; //Subract damage from Actor's hitpoints
+        
+        //If the Actor's hitpoints fall to or below 0, the Actor is dead
+        if (hitpoints <= 0){
+            hitpoints = 0;
+            alive = false;
+        }
+    }
+    
+    /**
+     * Restores the Actor's hitpoints by a given amount
+     * @param restore The amount of hitpoints the Actor is to recover
+     */
+    public void heal(int restore){
+        hitpoints += restore; //Heal the player by the set amount of hitpoints
+        
+        //If the Actor's hitpoints exceed the Actor's maxHP, reset them to be equal
+        if (hitpoints >= maxHP)
+            hitpoints = maxHP;
     }
     
     //SERIALIZATION METHODS
