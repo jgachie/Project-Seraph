@@ -18,14 +18,14 @@ public class Smog extends Spell{
     
     public Smog() {
         super("Smog",
-                "A spell that generates a thick smokescreen, obscuring the enemies' field of vision "
-                        + "and causing their accuracy to decrease. Also has a chance to poison enemy."
+                "A spell that generates a thick smokescreen, obscuring the enemy party's field of vision"
+                        + " and causing their accuracy to decrease. Also has a chance to poison enemy."
                         + " If the spell fails, the party of the user's accuracy decreases instead. "
                         + "(Costs 20 MP)",
                 20,
                 40,
-                0,
-                0);
+                false,
+                true);
     }
     
     @Override
@@ -36,8 +36,10 @@ public class Smog extends Spell{
         System.out.println(caster.getName() + " prepares to cast the spell...\n");
         Combat.delay();
         
+        caster.useMana(manaReq); //Subtract the spell's required mana from the caster's current mana
+        
         //If the spell misses, output a failure message and return
-        if (!spellHit(caster, baseChance)){
+        if (!spellHit(caster)){
             System.out.println("...The spell failed!");
             return;
         }

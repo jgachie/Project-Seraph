@@ -1,13 +1,11 @@
 /*
-* To change this license header, choose License Headers in Project Properties.
-* To change this template file, choose Tools | Templates
-* and open the template in the editor.
-*/
-package Spells;
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package Skills;
 
-import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
-import UI.UITextBox;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -15,23 +13,23 @@ import java.util.Random;
  *
  * @author Soup
  */
-public abstract class Spell implements Serializable{
+public abstract class Skill implements Serializable{
     protected static Random dieRoll = new Random(); //A Random object for determining various outcomes
     
-    protected final String name; //The name of the spell
-    protected final String desc; //The spell's description
-    protected final int manaReq; //The amount of mana required to cast the spell
-    protected final int baseChance; //The base chance of the spell succeeding
-    protected final int critChance; //The base chance of the spell getting a critical hit
-    protected final int minDamage, maxDamage; //The lowest and highest amounts of base damage the spell can deal
-    protected final boolean friendly; //Whether or not the spell is to be used on the Player's party or the enemy's; true if the Player's party, false if the enemy's
-    protected final boolean multi; //Whether the spell is to be used on a single target or multiple targets; true if multiple targets, false if only one
+    protected final String name; //The name of the skill
+    protected final String desc; //The skill's description
+    protected final int skillReq; //The amount of skillpoints required to use the skill
+    protected final int baseChance; //The base chance of the skill succeeding
+    protected final int critChance; //The base chance of the skill getting a critical hit
+    protected final int minDamage, maxDamage; //The lowest and highest amounts of base damage the skill can deal
+    protected final boolean friendly; //Whether or not the skill is to be used on the Player's party or the enemy's; true if the Player's party, false if the enemy's
+    protected final boolean multi; //Whether the skill is to be used on a single target or multiple targets; true if multiple targets, false if only one
     
-    protected Spell(String name, String desc, int manaReq, int baseChance, int critChance, int minDamage,
+    protected Skill(String name, String desc, int skillReq, int baseChance, int critChance, int minDamage,
             int maxDamage, boolean friendly, boolean multi){
         this.name = name;
         this.desc = desc;
-        this.manaReq = manaReq;
+        this.skillReq = skillReq;
         this.baseChance = baseChance;
         this.critChance = critChance;
         this.minDamage = minDamage;
@@ -40,11 +38,11 @@ public abstract class Spell implements Serializable{
         this.multi = multi;
     }
     
-    //For spells that don't deal damage
-    protected Spell(String name, String desc, int manaReq, int baseChance, boolean friendly, boolean multi){
+    //For skills that don't deal damage
+    protected Skill(String name, String desc, int skillReq, int baseChance, boolean friendly, boolean multi){
         this.name = name;
         this.desc = desc;
-        this.manaReq = manaReq;
+        this.skillReq = skillReq;
         this.baseChance = baseChance;
         this.critChance = 0;
         this.minDamage = 0;
@@ -54,22 +52,21 @@ public abstract class Spell implements Serializable{
     }
     
     /**
-     * Casts the spell
-     * @param caster The Actor casting the spell
+     * Uses the skill
+     * @param user The Actor using the skill
      * @param target The Actor being targeted
      */
-    public abstract void cast(Actor caster, Actor target);
+    public abstract void use(Actor user, Actor target);
     
     /**
-     * Uses caster's wisdom and spell's base damage to calculate initial damage dealt before running
-     * resistances
-     * @param caster The Actor casting the spell
+     * Uses user's skill and skill's base damage to calculate initial damage dealt before running resistances
+     * @param user The Actor using the skill
      * @return The amount of damage dealt
      */
-    protected int calcDamage(Actor caster){
-        int wisdom = caster.getWisdom();
+    protected int calcDamage(Actor user){
+        int wisdom = user.getWisdom();
         int damage = 0;
-        int baseDamage = dieRoll.nextInt(maxDamage + 1) + minDamage; //Roll for base damage using spell's min and max damage as range
+        int baseDamage = dieRoll.nextInt(maxDamage + 1) + minDamage; //Roll for base damage using skill's min and max damage as range
         
         //Calculate damage dealt
         if (wisdom < 25)
@@ -79,8 +76,8 @@ public abstract class Spell implements Serializable{
         else if (wisdom > 50)
             damage = (int) (baseDamage * (wisdom / 20.0) + (baseDamage * 4.9));
         
-        //If the spell was critical, multiply the damage by 2
-        if (spellCrit(caster)){
+        //If the skill was critical, multiply the damage by 2
+        if (skillCrit(user)){
             System.out.println("It was a critical hit!");
             damage *= 2;
         }
@@ -89,14 +86,14 @@ public abstract class Spell implements Serializable{
     }
     
     /**
-     * Tests intelligence against given base chance of success to determine whether a spell hits or
+     * Tests intelligence against given base chance of success to determine whether a skill hits or
      * not
-     * @param caster The Actor casting the spell
-     * @return True if the spell hit; false if it missed
+     * @param user The Actor using the skill
+     * @return True if the skill hit; false if it missed
      */
-    protected boolean spellHit(Actor caster){
-        boolean hit = false; //Whether or not the spell will succeed; initialized to false
-        int intelligence = caster.getIntelligence();
+    protected boolean skillHit(Actor user){
+        boolean hit = false; //Whether or not the skill will succeed; initialized to false
+        int intelligence = user.getIntelligence();
         int accuracy = dieRoll.nextInt(100); //Roll for accuracy
         
         //Determine whether the hit was critical
@@ -123,13 +120,13 @@ public abstract class Spell implements Serializable{
     }
     
     /**
-     * Tests luck against given critical hit chance to determine whether a spell is critical or not
-     * @param caster The actor casting the spell
-     * @return True if the spell was critical; false if it wasn't
+     * Tests luck against given critical hit chance to determine whether a skill is critical or not
+     * @param user The actor using the skill
+     * @return True if the skill was critical; false if it wasn't
      */
-    protected boolean spellCrit(Actor caster){
-        boolean crit = false; //Whether or not the spell will be critical; initialized to false
-        int luck = caster.getLuck();
+    protected boolean skillCrit(Actor user){
+        boolean crit = false; //Whether or not the skill will be critical; initialized to false
+        int luck = user.getLuck();
         int chance = dieRoll.nextInt(100); //Roll for crit
         
         if (luck < 25){
@@ -164,8 +161,8 @@ public abstract class Spell implements Serializable{
         return desc;
     }
     
-    public int getManaReq() {
-        return manaReq;
+    public int getSkillReq() {
+        return skillReq;
     }
     
     public int getBaseChance() {

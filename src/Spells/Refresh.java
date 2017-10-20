@@ -23,21 +23,26 @@ public class Refresh extends Spell{
                 35,
                 60,
                 10,
-                10);
+                5,
+                10,
+                true,
+                false);
     }
 
     @Override
     public void cast(Actor caster, Actor target) {
         int intelligence = caster.getIntelligence(); //The caster's intelligence
         int restore = 0; //The amount of hitpoints restored by the spell
+        int baseRestore = dieRoll.nextInt(maxDamage + 1) + minDamage;
         
         UITextBox.resetBAOS();
         System.out.println(caster.getName() + " prepares to cast the spell...\n");
         Combat.delay();
         
+        caster.useMana(manaReq); //Subtract the spell's required mana from the caster's current mana
         
         //If the spell misses, output a failure message and return
-        if (!spellHit(caster, baseChance)){
+        if (!spellHit(caster)){
             System.out.println("...The spell failed!");
             return;
         }
@@ -46,11 +51,17 @@ public class Refresh extends Spell{
         
         //Calculate number of hitpoints to be restored
         if (intelligence < 25)
-            restore = (int) (baseDamage * (intelligence / 5.0));
+            restore = (int) (baseRestore * (intelligence / 5.0));
         else if (25 <= intelligence && intelligence < 50)
-            restore = (int) (baseDamage * (intelligence / 10.0) + (baseDamage * 2.4));
+            restore = (int) (baseRestore * (intelligence / 10.0) + (baseRestore * 2.4));
         else if (intelligence > 50)
-            restore = (int) (baseDamage * (intelligence / 20.0) + (baseDamage * 4.9));
+            restore = (int) (baseRestore * (intelligence / 20.0) + (baseRestore * 4.9));
+        
+        //If the spell was critical, multiply the number of hitpoints restored by 2
+        if (spellCrit(caster)){
+            System.out.println("It was a critical hit!");
+            restore *= 2;
+        }
         
         System.out.println(target.getName() + " recovered " + restore + " hitpoints!");
         target.heal(restore); //Heal the target

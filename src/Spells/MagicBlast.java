@@ -27,23 +27,27 @@ public class MagicBlast extends Spell{
                 40,
                 50,
                 5,
-                9);
+                5,
+                10,
+                false,
+                true);
     }
     
     
     @Override
     public void cast(Actor caster, Actor target) {
-        int wisdom = caster.getWisdom(); //The caster's wisdom
         Enemy enemy = (Enemy) target; //Cast the target to an enemy object
-        int damageBuffer = 0; //Holds the amount of damage the spell does before factoring in individual resistances
+        int damageBuffer; //Holds the amount of damage the spell does before factoring in individual resistances
         int[] damages = new int[enemy.getEnemyParty().size()]; //An array holding the amount of damage dealt to each individual enemy after factoring in resistances
         
         UITextBox.resetBAOS();
         System.out.println(caster.getName() + " prepares to cast the spell...\n");
         Combat.delay();
         
+        caster.useMana(manaReq); //Subtract the spell's required mana from the caster's current mana
+        
         //If the spell misses, output a failure message and return
-        if (!spellHit(caster, baseChance)){
+        if (!spellHit(caster)){
             System.out.println("...The spell failed!");
             return;
         }
@@ -51,12 +55,7 @@ public class MagicBlast extends Spell{
         System.out.println("...The spell succeeded!");
         
         //Calculate damage dealt
-        if (wisdom < 25)
-            damageBuffer = (int) (baseDamage * (wisdom / 5.0));
-        else if (25 <= wisdom && wisdom < 50)
-            damageBuffer = (int) (baseDamage * (wisdom / 10.0) + (baseDamage * 2.4));
-        else if (wisdom > 50)
-            damageBuffer = (int) (baseDamage * (wisdom / 20.0) + (baseDamage * 4.9));
+        damageBuffer = calcDamage(caster);
         
         //Iterate through Enemy party and calculate individual resistances for individual damage values, then deal the damage
         for (int i = 0; i < enemy.getEnemyParty().size(); i++){

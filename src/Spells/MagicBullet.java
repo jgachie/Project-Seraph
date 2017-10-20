@@ -24,42 +24,42 @@ public class MagicBullet extends Spell{
                 20,
                 65,
                 10,
-                12);
+                8,
+                13,
+                false,
+                false);
     }
     
     @Override
     public void cast(Actor caster, Actor target) {
-        int damage = 0;
-        int wisdom = caster.getWisdom();
+        int damage;
         
         UITextBox.resetBAOS();
         System.out.println(caster.getName() + " prepares to cast the spell...\n");
         Combat.delay();
         
+        caster.useMana(manaReq); //Subtract the spell's required mana from the caster's current mana
+        
         //If the spell misses, output a failure message and return
-        if (!spellHit(caster, baseChance)){
+        if (!spellHit(caster)){
             System.out.println("...The spell failed!");
             return;
         }
         
         System.out.println("...The spell succeeded!");
         
-        //Calculate damage dealt
-        if (wisdom < 25)
-            damage = (int) (baseDamage * (wisdom / 5.0));
-        else if (25 <= wisdom && wisdom < 50)
-            damage = (int) (baseDamage * (wisdom / 10.0) + (baseDamage * 2.4));
-        else if (wisdom > 50)
-            damage = (int) (baseDamage * (wisdom / 20.0) + (baseDamage * 4.9));
+        //Calculate the damage dealt
+        damage = calcDamage(caster);
         
+        //Factor in enemy resistances
         damage = target.calcDamageReceived(damage, DamageType.MAGIC, StatusEffect.NONE);
         
+        //If the attack wasn't evaded or completely blocked, deal the damage to the target
         if (damage > 0){
             System.out.println(target.getName() + " took " + damage + " damage");
             target.dealDamage(damage);
         }
-        else{
+        else
             System.out.println(target.getName() + " blocked the spell!");
-        }
     }
 }

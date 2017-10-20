@@ -158,14 +158,16 @@ public abstract class Actor extends Creature{
             System.out.println(name + " missed!");
             return;
         }
-        else{
-            damage = calcAttackDamage();
-            damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
-        }
+        
+        System.out.println("...The attack hit!");
+        
+        
+        damage = calcAttackDamage();
+        
+        damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
         if (damage > 0){
-            System.out.println("...The attack hit!");
             System.out.println(target.name + " took " + damage + " damage!");
             target.dealDamage(damage);
         }
@@ -184,7 +186,7 @@ public abstract class Actor extends Creature{
      * critical.
      * @return The amount of damage dealt
      */
-    public int calcAttackDamage(){
+    private int calcAttackDamage(){
         int baseDamage; //The base damage of the weapon
         int damage = 0; //The amount of damage dealt
         
@@ -204,9 +206,11 @@ public abstract class Actor extends Creature{
         else if (strength > 50)
             damage = (int) (baseDamage * (strength / 20.0) + (baseDamage * 4.9));
         
-        //If the attack was critical, multiply the damage by 1.5
-        if (attackCrit())
+        //If the attack was critical, multiply the damage by 2
+        if (attackCrit()){
+            System.out.println("It was a critical hit!");
             damage *= 1.5;
+        }
         
         return damage;
     }
@@ -386,6 +390,18 @@ public abstract class Actor extends Creature{
         //If the Actor's hitpoints exceed the Actor's maxHP, reset them to be equal
         if (hitpoints >= maxHP)
             hitpoints = maxHP;
+    }
+    
+    /**
+     * Subtracts from the Actor's mana as a result of using a spell
+     * @param spellMana The amount of mana the used spell takes
+     */
+    public void useMana(int spellMana){
+        mana -= spellMana; //Subtract the amount of mana the spell uses from the Actor's current mana
+        
+        //If the Actor's mana falls to or below 0 (which should never happen), reset the mana to 0
+        if (mana <= 0)
+            mana = 0;
     }
     
     //SERIALIZATION METHODS

@@ -24,7 +24,8 @@ public class Combat implements Runnable{
     private Handler handler; //The handler
     private Thread thread; //Combat thread
     private PlayableActor turn; //The PlayableActor whose turn it is currently
-    private boolean ready = false; //Whether the combat thread is ready to receive button input or not
+    private boolean ready; //Whether the combat thread is ready to receive button input or not
+    private int numTurns; //The number of turns that have passed so far
     private ArrayList<PlayableActor> party; //The Player's party
     private ArrayList<Enemy> enemyParty; //The enemy party
     private ArrayList<Actor> actors; //All of the actors participating in the battle
@@ -34,6 +35,8 @@ public class Combat implements Runnable{
         this.party = party;
         this.enemyParty = enemyParty;
         this.actors = new ArrayList<Actor>();
+        this.ready = false;
+        this.numTurns = 0;
     }
     
     public void init(){
@@ -114,7 +117,7 @@ public class Combat implements Runnable{
                 }
             }
             
-            
+            numTurns++;
             
             /*
             Commented out for now; can't think of a reason to remove dead Actors from list of Actors (especially since Player still needs to see dead party member info)
@@ -222,6 +225,10 @@ public class Combat implements Runnable{
     
     public boolean isReady(){
         return ready;
+    }
+    
+    public int getNumTurns() {
+        return numTurns;
     }
     
     /**
