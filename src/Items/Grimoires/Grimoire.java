@@ -5,7 +5,8 @@
 */
 package Items.Grimoires;
 
-import Entities.Creatures.Actors.Actor;
+import Entities.Specials.Spells.Spell;
+import Entities.Specials.Spells.Basic.*;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Equipment.Equipment;
 import java.awt.image.BufferedImage;
@@ -13,15 +14,14 @@ import java.util.ArrayList;
 import Enums.Characters;
 import Enums.GrimoireType;
 import Graphics.Assets;
-import Spells.*;
 import java.util.Arrays;
 
 /**
- * An empty abstract class purely for inheritance purposes (may replace with interface later on)
+ * 
  * @author Soup
  */
 public class Grimoire extends Equipment{
-    //Hard-code all different types of weapons here
+    //Hard-code all different types of grimoires here
     public static Grimoire[] grimoires = new Grimoire[256];
     public static Grimoire basicGrimoire = new Grimoire(Assets.stone, "Basic Grimoire", "G001", new int[]{0, 0, 3, 3, 0, 0, 0, 0},
             GrimoireType.BASIC, new ArrayList<Spell>(){{
@@ -37,8 +37,6 @@ public class Grimoire extends Equipment{
         this.TYPE = type;
         this.spells = spells;
     }
-    
-    
     
     @Override
     public void equip(PlayableActor actor){

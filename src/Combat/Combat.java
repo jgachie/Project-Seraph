@@ -8,6 +8,7 @@ package Combat;
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
+import Enums.StatusEffect;
 import Main.Handler;
 import UI.UITextBox;
 import java.util.ArrayList;
@@ -100,6 +101,22 @@ public class Combat implements Runnable{
             //Iterate through each Actor and, if they're alive, have them take their turn
             for (Actor actor : actors){
                 if (actor.isAlive()){
+                    ArrayList<StatusEffect> effects = actor.getStatus();
+                    
+                    //If the Actor is stunned or frozen, skip their turn
+                    if (effects.contains(StatusEffect.FREEZE)){
+                        UITextBox.resetBAOS();
+                        System.out.println(actor.getName() + " is frozen!");
+                        delay();
+                        continue;
+                    }
+                    else if (effects.contains(StatusEffect.STUN)){
+                        UITextBox.resetBAOS();
+                        System.out.println(actor.getName() + " is stunned!");
+                        delay();
+                        continue;
+                    }
+                    
                     actor.takeTurn();
                     
                     delay();
@@ -108,7 +125,23 @@ public class Combat implements Runnable{
                         break combatLoop;
                 }
                 
-                //Print status of actors to screen
+                //Print status of Actors to screen
+                UITextBox.resetBAOS();
+                for (Actor actorr : actors){
+                    System.out.print(actorr.getName() + " - ");
+                    System.out.println("HP: " + actorr.getHitpoints() + '/' + actorr.getMaxHP());
+                    System.out.println("MP: " + actorr.getMana() + '/' + actorr.getMaxMP() + "\n");
+                }
+            }
+            
+            //Iterate through each Actor and, if they're alive, update their status effects
+            for (Actor actor : actors){
+                
+                if (actor.isAlive()){
+                    actor.updateStatus(numTurns);
+                }
+                
+                //Print status of Actors to screen
                 UITextBox.resetBAOS();
                 for (Actor actorr : actors){
                     System.out.print(actorr.getName() + " - ");
@@ -176,12 +209,38 @@ public class Combat implements Runnable{
     }
     
     /**
+     * Makes the Combat thread wait until animations complete
+     */
+    public void animationDelay(){
+        try {
+            synchronized (this){
+                this.wait(); //Wait for the animation to complete
+            }
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
      * Sleeps the thread for the duration of the combat delay; used so that combat calculations and
      * outcomes aren't displayed all at once
      */
     public static void delay(){
         try{
             Thread.sleep(DELAY);
+        } catch (InterruptedException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Sleeps the thread for a given duration; used so that combat calculations and outcomes aren't 
+     * displayed all at once
+     * @param time The amount of time for which the Thread is to sleep
+     */
+    public static void delay(int time){
+        try{
+            Thread.sleep(time);
         } catch (InterruptedException ex){
             ex.printStackTrace();
         }

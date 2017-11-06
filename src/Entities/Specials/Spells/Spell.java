@@ -3,54 +3,23 @@
 * To change this template file, choose Tools | Templates
 * and open the template in the editor.
 */
-package Spells;
+package Entities.Specials.Spells;
 
-import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
-import UI.UITextBox;
-import java.io.Serializable;
-import java.util.Random;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
+import Entities.Specials.Special;
+import Main.Handler;
 
 /**
  *
  * @author Soup
  */
-public abstract class Spell implements Serializable{
-    protected static Random dieRoll = new Random(); //A Random object for determining various outcomes
+public abstract class Spell extends Special{
     
-    protected final String name; //The name of the spell
-    protected final String desc; //The spell's description
-    protected final int manaReq; //The amount of mana required to cast the spell
-    protected final int baseChance; //The base chance of the spell succeeding
-    protected final int critChance; //The base chance of the spell getting a critical hit
-    protected final int minDamage, maxDamage; //The lowest and highest amounts of base damage the spell can deal
-    protected final boolean friendly; //Whether or not the spell is to be used on the Player's party or the enemy's; true if the Player's party, false if the enemy's
-    protected final boolean multi; //Whether the spell is to be used on a single target or multiple targets; true if multiple targets, false if only one
-    
-    protected Spell(String name, String desc, int manaReq, int baseChance, int critChance, int minDamage,
-            int maxDamage, boolean friendly, boolean multi){
-        this.name = name;
-        this.desc = desc;
-        this.manaReq = manaReq;
-        this.baseChance = baseChance;
-        this.critChance = critChance;
-        this.minDamage = minDamage;
-        this.maxDamage = maxDamage;
-        this.friendly = friendly;
-        this.multi = multi;
-    }
-    
-    //For spells that don't deal damage
-    protected Spell(String name, String desc, int manaReq, int baseChance, boolean friendly, boolean multi){
-        this.name = name;
-        this.desc = desc;
-        this.manaReq = manaReq;
-        this.baseChance = baseChance;
-        this.critChance = 0;
-        this.minDamage = 0;
-        this.maxDamage = 0;
-        this.friendly = friendly;
-        this.multi = multi;
+    protected Spell(String name, String desc, int pointReq, int baseChance, int critChance, int minDamage,
+            int maxDamage, boolean friendly, boolean multi, int width, int height){
+        super(0, 0, width, height, name, desc, pointReq, baseChance, critChance, minDamage, maxDamage,
+                friendly, multi);
     }
     
     /**
@@ -58,7 +27,11 @@ public abstract class Spell implements Serializable{
      * @param caster The Actor casting the spell
      * @param target The Actor being targeted
      */
-    public abstract void cast(Actor caster, Actor target);
+    public void cast(PlayableActor caster, Actor target, Handler handler){
+        this.user = caster;
+        this.target = target;
+        this.handler = handler;
+    }
     
     /**
      * Uses caster's wisdom and spell's base damage to calculate initial damage dealt before running
@@ -154,41 +127,5 @@ public abstract class Spell implements Serializable{
         //Obviously, this shit is broken, but I can't be bothered to fix it right now
         
         return crit;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public String getDesc() {
-        return desc;
-    }
-    
-    public int getManaReq() {
-        return manaReq;
-    }
-    
-    public int getBaseChance() {
-        return baseChance;
-    }
-    
-    public int getCritChance() {
-        return critChance;
-    }
-    
-    public int getMinDamage() {
-        return minDamage;
-    }
-    
-    public int getMaxDamage() {
-        return maxDamage;
-    }
-    
-    public boolean getFriendly() {
-        return friendly;
-    }
-    
-    public boolean getMulti() {
-        return multi;
     }
 }

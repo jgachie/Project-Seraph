@@ -6,6 +6,7 @@
 package Entities;
 
 import Entities.Creatures.Actors.PlayableActors.Player;
+import Entities.Specials.Special;
 import Main.Handler;
 import java.awt.Graphics;
 import java.util.ArrayList;
@@ -27,11 +28,28 @@ public class EntityManager {
          */
         @Override
         public int compare(Entity a, Entity b) {
-            //If the bottom of Entity a is higher up on the screen than that of Entity b, render a first; if not, render b first
-            if (a.getY() + a.getHeight() < b.getY() + b.getHeight())
-                return -1;
-            else
+            //All special entities should be rendered before any other kind of entity
+            
+            //If both entities are special, normal rendering rules apply
+            if (a instanceof Special && b instanceof Special){
+                if (a.getY() + a.getHeight() < b.getY() + b.getHeight())
+                    return -1;
+                else
+                    return 1;
+            }
+            //If either a or b are special entities (but not the other), render the special one first
+            else if (a instanceof Special)
                 return 1;
+            else if (b instanceof Special)
+                return -1;
+            //If neither entity is special, normal rendering rules apply
+            else{
+                //If the bottom of Entity a is higher up on the screen than that of Entity b, render a first; if not, render b first
+                if (a.getY() + a.getHeight() < b.getY() + b.getHeight())
+                    return -1;
+                else
+                    return 1;
+            }
         }
         
     };
@@ -49,13 +67,21 @@ public class EntityManager {
     }
     
     public void tick(){
-        //Iterates through entity list and ticks each entity (DON'T CHANGE THIS; NOT AN ENHANCED FOR LOOP FOR A REASON)
+        //Iterates through entity list and ticks each entity
         Iterator<Entity> it = entities.iterator();
         while (it.hasNext()){
             Entity e = it.next();
-            e.tick();
-            if (!e.isActive())
+            
+            e.tick(); //Tick the entity
+            
+            //If the entity is no longer active, remove it from the iterator and the list of entities
+            if (!e.isActive()){
+                synchronized (handler.getCombat()){
+                    handler.getCombat().notifyAll(); //Notify any waiting threads in case the entity was a special entity finishing up its animation
+                }
+                
                 it.remove();
+            }
         }
         
         entities.sort(renderSorter); //Sort entity list for proper rendering order
@@ -72,6 +98,9 @@ public class EntityManager {
      * @param e The entity to be added
      */
     public void addEntity(Entity e){
+        if (e.getHandler() == null)
+            e.setHandler(handler);
+        
         entities.add(e);
     }
     

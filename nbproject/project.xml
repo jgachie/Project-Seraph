@@ -16,6 +16,7 @@
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>caster's</word>
             <word>grimoire</word>
+            <word>grimoire's</word>
             <word>hitpoints</word>
             <word>Rynn</word>
             <word>skill's</word>
@@ -23,6 +24,7 @@
             <word>Spellcasting</word>
             <word>stat</word>
             <word>tilemap</word>
+            <word>tome's</word>
             <word>Zanna</word>
         </spellchecker-wordlist>
     </configuration>

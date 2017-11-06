@@ -6,6 +6,7 @@
 package Entities.Creatures.Actors.PlayableActors;
 
 import Entities.Creatures.Actors.Actor;
+import Entities.EntityManager;
 import Items.Equipment.Weapon;
 import Items.Grimoires.Grimoire;
 import Items.Tomes.Tome;
@@ -28,6 +29,10 @@ public abstract class PlayableActor extends Actor{
     protected Tome tome; //Actor's currently equipped tome; determines which skills Actor can use in battle
     protected final Characters CHARACTER; //The Actor's character value (Sariel, Zanna, Rynn, etc.); determines which equipment the Actor can use, among other things
     protected ArrayList<PlayableActor> party; //The Actor's party
+    
+    //TEMPORARY COMBAT FIELDS
+    protected boolean casting = false;
+            
     private int[] statSave; //An array holding the Actor's original, unmodified stats before entering combat
     
     protected PlayableActor(Handler handler, float x, float y, int width, int height, String name, Characters character,
@@ -43,6 +48,7 @@ public abstract class PlayableActor extends Actor{
         this.party = party;
         this.statSave = new int[8];
         this.grimoire = Grimoire.basicGrimoire;
+        this.tome = Tome.basicTome;
         
         //Standard initializations
         stance = Stance.NEUTRAL;
@@ -73,28 +79,25 @@ public abstract class PlayableActor extends Actor{
     //COMBAT METHODS
     
     /**
-     * Spellcasting method; determines type of equipped grimoire and calls its castSpell method
+     * Spellcasting method; determines the spell to be cast from the currently equipped grimoire's list
+     * of spells and calls its cast method
      * @param target The Actor being targeted
      * @param spellNum The ordinal number of the spell being cast (should be between 1 and 5)
+     * @param handler The handler
      */
-    public void castSpell(Actor target, int spellNum){
-        grimoire.getSpells().get(spellNum).cast(this, target);
+    public void castSpell(Actor target, int spellNum, Handler handler){
+        grimoire.getSpells().get(spellNum).cast(this, target, handler);
     }
     
     /**
-     * Method that uses skill; determines type of equipped tome and calls its useSkill method
+     * Skill using method; determines the skill to be used from the currently equipped tome's list of
+     * skills and calls it use method
      * @param target The Actor being targeted
      * @param skillNum The ordinal number of the skill being used (should be between 1 and 5)
+     * @param Handler The handler
      */
-    public void useSkill(Actor target, int skillNum){
-        //Determine the type of the equipped tome and cast "tome" to that type before calling useSkill method
-        switch (tome.getType()){
-            case BASIC:
-                break;
-            default:
-                //Shouldn't ever get here; if you do, FUCKING PANIC
-                break;
-        }
+    public void useSkill(Actor target, int skillNum, Handler handler){
+        tome.getSkills().get(skillNum).use(this, target, handler);
     }
     
     /**
@@ -185,7 +188,7 @@ public abstract class PlayableActor extends Actor{
         return new int[]{strength, dexterity, wisdom, intelligence, luck, defense, agility, skill};
     }
     
-    //SERIALIZATION METHODS
+    //MISC METHODS
     
     /**
      * PlayableActor save method; calls the save supermethod with a specific filename, provided by value
@@ -194,6 +197,11 @@ public abstract class PlayableActor extends Actor{
     public void save(){
         save(this, CHARACTER);
     }
+    
+    /**
+     * Resets all single-run animations used during combat
+     */
+    public abstract void resetAnimations();
     
     //GETTERS/SETTERS
     
@@ -237,19 +245,19 @@ public abstract class PlayableActor extends Actor{
         this.stance = stance;
     }
     
-    public Grimoire getGrimoire(){
+    public Grimoire getGrimoire() {
         return grimoire;
     }
     
-    public void setGrimoire(Grimoire grimoire){
+    public void setGrimoire(Grimoire grimoire) {
         this.grimoire = grimoire;
     }
     
-    public Tome getTome(){
+    public Tome getTome() {
         return tome;
     }
     
-    public void setTome(Tome tome){
+    public void setTome(Tome tome) {
         this.tome = tome;
     }
 
@@ -261,7 +269,15 @@ public abstract class PlayableActor extends Actor{
         this.party = party;
     }
     
-    public Characters getCharacter(){
+    public Characters getCharacter() {
         return CHARACTER;
+    }
+    
+    public boolean isCasting() {
+        return casting;
+    }
+    
+    public void setCasting(boolean casting) {
+        this.casting = casting;
     }
 }

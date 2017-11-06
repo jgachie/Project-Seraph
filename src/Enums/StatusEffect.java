@@ -10,9 +10,15 @@ package Enums;
  * @author Soup
  */
 public enum StatusEffect {
-    POISON,
-    TOXIC,
-    STUN,
-    FREEZE,
-    NONE;
+    //PERSISTENT EFFECTS
+    POISON, //Damages the Actor for a few hitpoints every turn
+    TOXIC, //More effective version of poison
+    STUN, //Paralyzes the Actor, making them incapable of taking a turn
+    FREEZE, //Same thing as stun, but also hurts the Actor for a few hitpoints every turn
+    
+    //TEMPORARY EFFECTS
+    DRAGON_SKIN, //Only applied on Sariel;
+    
+    //MISC
+    NONE; //Only ever applied to weapons; just means that the weapon doesn't inflict any kind of status effect
 }

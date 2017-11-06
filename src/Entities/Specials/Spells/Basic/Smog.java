@@ -3,12 +3,17 @@
 * To change this template file, choose Tools | Templates
 * and open the template in the editor.
 */
-package Spells;
+package Entities.Specials.Spells.Basic;
 
 import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
+import Entities.Specials.Spells.Spell;
+import Main.Handler;
 import UI.UITextBox;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 /**
  *
@@ -24,19 +29,40 @@ public class Smog extends Spell{
                         + "(Costs 20 MP)",
                 20,
                 40,
+                0,
+                0,
+                0,
                 false,
-                true);
+                true,
+                DEFAULT_SPECIAL_WIDTH,
+                DEFAULT_SPECIAL_HEIGHT);
+    }
+
+    @Override
+    public void tick() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void render(Graphics g) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected BufferedImage getCurrentAnimationFrame() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
-    public void cast(Actor caster, Actor target) {
+    public void cast(PlayableActor caster, Actor target, Handler handler) {
+        super.cast(caster, target, handler);
         Enemy enemy = (Enemy) target;
         
         UITextBox.resetBAOS();
         System.out.println(caster.getName() + " prepares to cast the spell...\n");
         Combat.delay();
         
-        caster.useMana(manaReq); //Subtract the spell's required mana from the caster's current mana
+        caster.useMana(pointReq); //Subtract the spell's required mana from the caster's current mana
         
         //If the spell misses, output a failure message and return
         if (!spellHit(caster)){

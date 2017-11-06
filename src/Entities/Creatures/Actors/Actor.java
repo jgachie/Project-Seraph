@@ -6,6 +6,7 @@
 package Entities.Creatures.Actors;
 
 import Combat.Combat;
+import Entities.Creatures.Actors.PlayableActors.Player;
 import Enums.StatusEffect;
 import Enums.DamageType;
 import Entities.Creatures.Creature;
@@ -13,8 +14,11 @@ import Enums.Characters;
 import Items.Equipment.Weapon;
 import Main.Handler;
 import UI.UITextBox;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -27,7 +31,7 @@ public abstract class Actor extends Creature{
     private transient static FileInputStream fileIn;
     private transient static ObjectInputStream objectIn;
     
-    //Output streams for saving the Actor object during serialization
+    //Output streams for saving the Actor object during serialization (could be static, will check later)
     private transient FileOutputStream fileOut;
     private transient ObjectOutputStream objectOut;
     
@@ -60,11 +64,16 @@ public abstract class Actor extends Creature{
     protected int poisonRes; //Actor's resistance to poison/toxic; determines chance of being poisoned/toxined (max of 500)
     protected int stunRes; //Actor's resistance to stun; determines chance of being stunned (max of 500)
     protected int freezeRes; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
-    protected StatusEffect status; //The status effect Actor is currently afflicted by
-    //Replace "status" with ArrayList of StatusEffects so an Actor can be afflicted by more than one status effect at a time
+    protected ArrayList<StatusEffect> status; //An ArrayList of the status effects the Actor is currently afflicted by
     protected transient Runnable action; //A set of combat methods set during the takeTurn phase of combat and run during the action phase
+    protected HashMap<StatusEffect, Integer> tempEffects; //A hashmap to hold the durations of certain status effects during combat; each key is a StatusEffect describing the effect
+    //that must be held, and the corresponding value is the turn on which the effect expires
     protected boolean alive = true; //Whether or not the Actor is alive
-    protected boolean fleeing = false; //Whether or not the Actor is successfully fleeing (only to be screwed with during combat)
+    
+    //TEMPORARY COMBAT FIELDS
+    protected Actor target; //The target of the Actor's attack
+    protected boolean fleeing = false; //Whether or not the Actor is successfully fleeing (don't fuck with this unless during combat)
+    protected boolean attacking = false;
     
     protected Actor(Handler handler, float x, float y, int width, int height, String name, Weapon weapon,
             int level, int hitpoints, int mana, int exp, int strength, int dexterity, int wisdom, int intelligence,
@@ -90,58 +99,11 @@ public abstract class Actor extends Creature{
         poisonRes = 50;
         stunRes = 50;
         freezeRes = 50;
-        status = StatusEffect.NONE;
+        status = new ArrayList<StatusEffect>();
+        tempEffects = new HashMap<StatusEffect, Integer>();
     }
     
-    /**
-     * Runs the batch of methods in the Actor's action buffer for combat
-     */
-    public void takeTurn(){
-        if (action != null)
-            action.run();
-    }
-    
-    /**
-     * Actor flee method; test against agility to see if flee attempt is successful.
-     */
-    public void flee(){
-        int chance = dieRoll.nextInt(100); //Roll for chance to flee
-        /*
-        Determines flee success by a combination of die roll and agility. With base agility level of
-        5, initial chance to flee will be 65%. Agility efficacy gradually diminishes as stat level increases;
-        by level 25, it's half as effective, and by level 50, it's no longer a factor at all, and chances
-        of failing remain at a constant 4%.
-        */
-        
-        if (agility < 25){
-            if (chance <= 40 - dexterity)
-                fleeing = false;
-            else
-                fleeing = true;
-        }
-        else if (25 <= dexterity && dexterity < 50){
-            if (agility <= 28 - (dexterity / 2))
-                fleeing = false;
-            else
-                fleeing = true;
-        }
-        else if (dexterity >= 50){
-            if (agility <= 4)
-                fleeing = false;
-            else
-                fleeing = true;
-        }
-        
-        UITextBox.resetBAOS();
-        
-        if (fleeing)
-            System.out.println("You got away!");
-        else
-            System.out.println("You couldn't get away!");
-    }
-    
-    //ATTACK METHODS
-    
+    //COMBAT METHODS
     /**
      * Actor attack method; calls methods for calculating damage dealt and received, as well as the
      * dealDamage method itself
@@ -151,7 +113,14 @@ public abstract class Actor extends Creature{
         int damage;
         UITextBox.resetBAOS();
         System.out.println(name + " prepares to attack...\n");
-        Combat.delay();
+        
+        attacking = true;
+        //If/else statement is temporary; Player is the only Actor with an attack animation right now, so it'll be the only one that needs an animation delay
+        if (this instanceof Player)
+            handler.getCombat().animationDelay();
+        else
+            Combat.delay();
+        attacking = false;
         
         //If the attack misses, return; otherwise, calculate initial damage dealt and then apply defense modifiers
         if (!attackHit()){
@@ -165,6 +134,8 @@ public abstract class Actor extends Creature{
         damage = calcAttackDamage();
         
         damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
+        
+        //TODO: Implement status effects
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
         if (damage > 0){
@@ -337,28 +308,40 @@ public abstract class Actor extends Creature{
      * @param effect The status effect
      */
     private void statusHit(StatusEffect effect){
-        //If the Actor is already afflicted by a status effect, return
-        if (status != StatusEffect.NONE)
-            return;
-        
         int chance = dieRoll.nextInt(500); //Roll for effect chance
         
         switch(effect){
             case POISON:
+                //If the Actor is already poisoned, do nothing and return
+                if (status.contains(StatusEffect.POISON))
+                    return;
+                
                 if (chance <= 500 - poisonRes)
-                    status = effect;
+                    status.add(effect);
                 break;
             case TOXIC:
+                //If the Actor is already toxined, do nothing and return
+                if (status.contains(StatusEffect.TOXIC))
+                    return;
+                
                 if (chance <= 500 - poisonRes)
-                    status = effect;
+                    status.add(effect);
                 break;
             case STUN:
+                //If the Actor is already stunned, do nothing and return
+                if (status.contains(StatusEffect.STUN))
+                    return;
+                
                 if (chance <= 500 - stunRes)
-                    status = effect;
+                    status.add(effect);
                 break;
             case FREEZE:
+                //If the Actor is already frozen, do nothing and return
+                if (status.contains(StatusEffect.FREEZE))
+                    return;
+                
                 if (chance <= 500 - freezeRes)
-                    status = effect;
+                    status.add(effect);
                 break;
             default:
                 //Shouldn't ever get here; if you do, FUCKING PANIC
@@ -404,7 +387,125 @@ public abstract class Actor extends Creature{
             mana = 0;
     }
     
-    //SERIALIZATION METHODS
+    /**
+     * Inflicts the Actor with a given status effect
+     * @param effect The status effect to be inflicted
+     */
+    public void addEffect(StatusEffect effect){
+        //If the Actor isn't already afflicted by the status effect, apply it; otherwise, do nothing
+        if (!status.contains(effect))
+            status.add(effect);
+    }
+    
+    /**
+     * Removes a given status effect from the Actor
+     * @param effect The status effect to be removed
+     */
+    public void removeEffect(StatusEffect effect){
+        //Only remove the effect if the Actor is currently afflicted with it; if not, do nothing
+        if (status.contains(effect))
+            status.remove(effect);
+    }
+    
+    /**
+     * Inflicts the Actor with a temporary status effect
+     * @param effect The status effect to be inflicted
+     * @param expires The turn on which the effect expires
+     */
+    public void addTempEffect(StatusEffect effect, int expires){
+        //If the effect is already in the HashMap (returns a non-null value), do nothing and return
+        if (tempEffects.get(effect) != null)
+            return;
+        
+        tempEffects.put(effect, expires); //Add the effect to the HashMap
+        addEffect(effect); //Apply the effect to the Actor
+    }
+    
+    /**
+     * Removes a temporary status effect from the Actor
+     * @param effect The status effect to be removed
+     */
+    public void removeTempEffect(StatusEffect effect){
+        //If the effect isn't already in the HashMap (returns a null value), do nothing and return
+        if (tempEffects.get(effect) == null)
+            return;
+        
+        tempEffects.remove(effect); //Remove the effect from the HashMap
+        removeEffect(effect); //Remove the effect from the Actor
+    }
+    
+    /**
+     * Updates the Actor's temporary status effects, and removes effects that have expired
+     * @param turn The number of the current turn
+     */
+    public void updateStatus(int turn){
+        Iterator it = tempEffects.entrySet().iterator(); //Create an Iterator for iterating through the HashMap
+        
+        //Run through the HashMap of status effects
+        while (it.hasNext()){
+            HashMap.Entry entry = (HashMap.Entry) it.next(); //Get the next entry
+            StatusEffect effect = (StatusEffect) entry.getKey(); //Store the status effect in question
+            int expires = (int) entry.getValue(); //Store the turn on which the effect expires
+            
+            //If the current turn is the turn on which the effect expires, remove the effect from the Actor
+            if (expires >= turn)
+                removeTempEffect(effect);
+            
+            Combat.delay(); //Run the Combat delay
+            
+            it.remove(); //Avoids a ConcurrentModificationException... whatever the fuck that is...
+        }
+    }
+    
+    /**
+     * Runs the batch of methods in the Actor's action buffer for combat
+     */
+    public void takeTurn(){
+        //Only run the batch of methods if it isn't null
+        if (action != null)
+            action.run();
+    }
+    
+    /**
+     * Actor flee method; test against agility to see if flee attempt is successful.
+     */
+    public void flee(){
+        int chance = dieRoll.nextInt(100); //Roll for chance to flee
+        /*
+        Determines flee success by a combination of die roll and agility. With base agility level of
+        5, initial chance to flee will be 65%. Agility efficacy gradually diminishes as stat level increases;
+        by level 25, it's half as effective, and by level 50, it's no longer a factor at all, and chances
+        of failing remain at a constant 4%.
+        */
+        
+        if (agility < 25){
+            if (chance <= 40 - dexterity)
+                fleeing = false;
+            else
+                fleeing = true;
+        }
+        else if (25 <= dexterity && dexterity < 50){
+            if (agility <= 28 - (dexterity / 2))
+                fleeing = false;
+            else
+                fleeing = true;
+        }
+        else if (dexterity >= 50){
+            if (agility <= 4)
+                fleeing = false;
+            else
+                fleeing = true;
+        }
+        
+        UITextBox.resetBAOS();
+        
+        if (fleeing)
+            System.out.println("You got away!");
+        else
+            System.out.println("You couldn't get away!");
+    }
+    
+    //MISCELLANEOUS METHODS
     
     /**
      * Saves this version of an Actor to an object file
@@ -444,6 +545,12 @@ public abstract class Actor extends Creature{
         
         return null;
     }
+    
+    /**
+     * Returns the current animation frame so that it can be rendered
+     * @return A BufferedImage containing the current frame of the animation
+     */
+    protected abstract BufferedImage getCurrentAnimationFrame();
     
     //GETTERS/SETTERS
     
@@ -663,11 +770,11 @@ public abstract class Actor extends Creature{
         this.freezeRes = freezeRes;
     }
     
-    public StatusEffect getStatus() {
+    public ArrayList<StatusEffect> getStatus() {
         return status;
     }
     
-    public void setStatus(StatusEffect status) {
+    public void setStatus(ArrayList<StatusEffect> status) {
         this.status = status;
     }
     
@@ -677,6 +784,14 @@ public abstract class Actor extends Creature{
     
     public void setAction(Runnable action) {
         this.action = action;
+    }
+    
+    public HashMap<StatusEffect, Integer> getTempEffects() {
+        return tempEffects;
+    }
+    
+    public void setTempEffects(HashMap<StatusEffect, Integer> tempEffects) {
+        this.tempEffects = tempEffects;
     }
     
     public boolean isAlive() {
@@ -693,5 +808,13 @@ public abstract class Actor extends Creature{
     
     public void setFleeing(boolean fleeing) {
         this.fleeing = fleeing;
+    }
+    
+    public boolean isAttacking() {
+        return attacking;
+    }
+    
+    public void setAttacking(boolean attacking) {
+        this.attacking = attacking;
     }
 }

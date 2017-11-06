@@ -27,12 +27,15 @@ import java.awt.event.KeyEvent;
 public class Player extends PlayableActor{
     //Declare animations (must be static for serialization)
     private static Animation walkDown, walkUp, walkLeft, walkRight;
+    private static Animation runDown, runUp, runLeft, runRight;
+    private static Animation fightUp, fightDown, fightLeft, fightRight;
+    private static Animation attack, cast, fight;
     
     private Inventory inv; //The Player's inventory
     
     public Player(Handler handler, float x, float y, String name){
         super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Characters.SARIEL,
-                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 5, 5, 5, 5, 5, 5, new ArrayList<PlayableActor>());
+                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 5, 99, 5, 5, 5, 5, new ArrayList<PlayableActor>());
         
         //Set bounding box coordinates (relative to top-left corner of Player entity) and width/height
         bounds.x = 8;
@@ -41,10 +44,14 @@ public class Player extends PlayableActor{
         bounds.height = 28;
         
         //Initialize animations
-        walkDown = new Animation(150, Assets.player_down);
-        walkUp = new Animation(150, Assets.player_up);
-        walkLeft = new Animation(150, Assets.player_left);
-        walkRight = new Animation(150, Assets.player_right);
+        walkDown = new Animation(150, false, Assets.playerDown);
+        walkUp = new Animation(150, false, Assets.playerUp);
+        walkLeft = new Animation(150, false, Assets.playerLeft);
+        walkRight = new Animation(150, false, Assets.playerRight);
+        
+        attack = new Animation(150, true, Assets.playerAttackRight);
+        cast = new Animation(150, true, Assets.playerCastRight);
+        fight = new Animation(200, false, Assets.playerFightRight);
         
         //Initialize other shit
         inv = new Inventory(handler);
@@ -99,9 +106,27 @@ public class Player extends PlayableActor{
     
     @Override
     public void tick(){
-        //If the Player is currently engaged in combat, don't take in input for movement; just do nothing and return
-        if (State.getState() instanceof CombatState)
-            return;
+        
+        //Combat ticking rules
+        if (State.getState() instanceof CombatState){
+            if (attacking){
+                if (!attack.isCompleted())
+                    attack.tick();
+                else{
+                    attack.setCompleted(false); //Reset attack animation before notifying the combat thread
+                    synchronized(handler.getCombat()){
+                        handler.getCombat().notifyAll();
+                    }
+                }
+            }
+            else if (casting)
+                cast.tick();
+            //If the Player is idling, tick the fight animation
+            else{
+                fight.tick();
+                return;
+            }
+        }
         
         //If enough steps have been taken, trigger the encounter and initiate combat
         if (steps >= handler.getEncounter().getSteps()){
@@ -146,19 +171,40 @@ public class Player extends PlayableActor{
     
     @Override
     public void render(Graphics g){
-        //If the Player is currently engaged in combat, render the basic Player asset at a fixed position (so no need for camera offsets) and return
+        BufferedImage frame = getCurrentAnimationFrame();
+        
+        //If the Player is in combat, render normally, but without the camera offsets
         if (State.getState() instanceof CombatState){
-            g.drawImage(Assets.player, (int) (x), (int) (y), width, height, null);
+            g.drawImage(frame, (int) x, (int) y, frame.getWidth() * 2, frame.getHeight() * 2, null);
             return;
         }
-            
+        
         //Subtract offset from position to focus camera on Player
-        g.drawImage(getCurrentAnimationFrame(), (int) (x - handler.getGameCamera().getXOffset()),
-                (int) (y - handler.getGameCamera().getYOffset()), width, height, null);
+        g.drawImage(frame, (int) (x - handler.getGameCamera().getXOffset()),
+                (int) (y - handler.getGameCamera().getYOffset()), frame.getWidth() * 2, frame.getHeight() * 2, null);
         //inv.render(g); //Commented out for now; don't really know when (or even why) inventory should be rendered
     }
     
-    private BufferedImage getCurrentAnimationFrame(){
+    @Override
+    protected BufferedImage getCurrentAnimationFrame(){
+        //Combat rendering rules
+        if (State.getState() instanceof CombatState){
+            if (attacking){
+                if (!attack.isCompleted())
+                    return attack.getCurrentFrame();
+            }
+            else if (casting){
+                //If the animation has completed but the Player is still casting, return the last frame
+                if (cast.isCompleted())
+                    return cast.getLastFrame();
+                
+                return cast.getCurrentFrame();
+            }
+            
+            //If the Player is idling, return the current frame of the fight animation
+            return fight.getCurrentFrame();
+        }
+        
         if (xMove < 0)
             return walkLeft.getCurrentFrame();
         else if (xMove > 0)
@@ -179,16 +225,22 @@ public class Player extends PlayableActor{
      */
     public static Player load(Handler handler){
         Player player = (Player) Actor.load("Sariel");
-        player.setHandler(handler);
+        player.resetHandler(handler);
         return player;
     }
     
     /**
-     * Sets handlers for all necessary objects
+     * Resets handlers for all necessary objects after loading Player object from save file
      * @param handler The handler object
      */
-    private void setHandler(Handler handler){
+    private void resetHandler(Handler handler){
         this.handler = handler;
         inv.setHandler(handler);
+    }
+    
+    @Override
+    public void resetAnimations(){
+        cast.setCompleted(false);
+        attack.setCompleted(false);
     }
 }

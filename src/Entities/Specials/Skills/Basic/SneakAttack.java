@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Skills;
+package Entities.Specials.Skills.Basic;
 
 /**
  *
  * @author Soup
  */
-public class Enervate {
+public class SneakAttack {
     
 }

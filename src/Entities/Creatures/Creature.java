@@ -26,11 +26,12 @@ public abstract class Creature extends Entity{
     
     protected Creature(Handler handler, float x, float y, int width, int height){
         super(handler, x, y, width, height);
-        speed = DEFAULT_SPEED;
-        xMove = 0;
-        yMove = 0;
-        xCounter = 0;
-        yCounter = 0;
+        
+        this.speed = DEFAULT_SPEED;
+        this.xMove = 0;
+        this.yMove = 0;
+        this.xCounter = 0;
+        this.yCounter = 0;
     }
     
     /**
