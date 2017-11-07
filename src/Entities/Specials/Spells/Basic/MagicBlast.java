@@ -38,8 +38,8 @@ public class MagicBlast extends Spell{
                 10,
                 false,
                 true,
-                DEFAULT_SPECIAL_WIDTH,
-                DEFAULT_SPECIAL_HEIGHT);
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT);
         
         //Initialize animations
         exploding = new Animation(100, true, Assets.bulletExploding);
@@ -61,7 +61,7 @@ public class MagicBlast extends Spell{
         
         Enemy enemy = (Enemy) target;
         
-        for (Enemy e : enemy.getEnemyParty())
+        for (Enemy e : enemy.getParty())
             g.drawImage(getCurrentAnimationFrame(), (int) e.getX(), (int) e.getY() + (e.getHeight() / 4), width, height, null);
         
         if (exploding.isCompleted())
@@ -82,7 +82,7 @@ public class MagicBlast extends Spell{
         super.cast(caster, target, handler);
         Enemy enemy = (Enemy) target; //Cast the target to an enemy object
         int damageBuffer; //Holds the amount of damage the spell does before factoring in individual resistances
-        int[] damages = new int[enemy.getEnemyParty().size()]; //An array holding the amount of damage dealt to each individual enemy after factoring in resistances
+        int[] damages = new int[enemy.getParty().size()]; //An array holding the amount of damage dealt to each individual enemy after factoring in resistances
         
         UITextBox.resetBAOS();
         System.out.println(caster.getName() + " prepares to cast the spell...\n");
@@ -112,8 +112,8 @@ public class MagicBlast extends Spell{
         damageBuffer = calcDamage(caster);
         
         //Iterate through Enemy party and calculate individual resistances for individual damage values, then deal the damage
-        for (int i = 0; i < enemy.getEnemyParty().size(); i++){
-            Enemy mob = enemy.getEnemyParty().get(i);
+        for (int i = 0; i < enemy.getParty().size(); i++){
+            Enemy mob = enemy.getParty().get(i);
             
             //Only do damage calculations if the Enemy is still alive
             if (mob.isAlive()){

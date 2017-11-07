@@ -37,14 +37,14 @@ public class MagicBullet extends Spell{
                 13,
                 false,
                 false,
-                DEFAULT_SPECIAL_WIDTH,
-                DEFAULT_SPECIAL_HEIGHT);
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT);
         
         //Set bounding box coordinates (relative to top-left corner of entity) and width/height
         bounds.x = 0;
         bounds.y = 0;
-        bounds.width = DEFAULT_SPECIAL_WIDTH;
-        bounds.height = DEFAULT_SPECIAL_HEIGHT;
+        bounds.width = DEFAULT_WIDTH;
+        bounds.height = DEFAULT_HEIGHT;
         
         //Initialize animations
         forming = new Animation(100, true, Assets.bulletForming);
@@ -109,8 +109,12 @@ public class MagicBullet extends Spell{
         else if (forming.isCompleted() && !hit)
             return Assets.magicBullet;
         //If the forming animation has completed and the spell has hit, return the current frame of the exploding animation
-        else if (forming.isCompleted() && hit && !exploding.isCompleted())
+        else if (forming.isCompleted() && hit && !exploding.isCompleted()){
+            //Reposition the bullet so that it explodes on the enemy instead of just in front of it
+            x = target.getX();
+            y = target.getY() + (target.getHeight() / 4);
             return exploding.getCurrentFrame();
+        }
         
         return null; //If all else fails, return null
     }

@@ -1,8 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Entities.Specials.Skills.Basic;
 
 import Entities.Creatures.Actors.Actor;
@@ -35,25 +35,25 @@ public class TaintedEdge extends Skill{
                 0,
                 false,
                 false,
-                DEFAULT_SPECIAL_WIDTH,
-                DEFAULT_SPECIAL_HEIGHT);
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT);
     }
-
+    
     @Override
     public void tick() {
         
     }
-
+    
     @Override
     public void render(Graphics g) {
         
     }
-
+    
     @Override
     protected BufferedImage getCurrentAnimationFrame() {
         return null;
     }
-
+    
     @Override
     public void use(PlayableActor user, Actor target, Handler handler) {
         super.use(user, target, handler);
@@ -63,9 +63,18 @@ public class TaintedEdge extends Skill{
         UITextBox.resetBAOS();
         System.out.println(user.getName() + " prepares to use the skill...\n");
         
+        user.useSkillpoints(pointReq);
+        
+        Combat.delay();
+        
         if (!skillHit(user)){
             System.out.println(user.getName() + " done goofed!");
             
+            //If the user misses and lands a critical, they'll be poisoned
+            if (skillCrit(user))
+                user.addEffect(StatusEffect.POISON);
+            
+            return;
         }
         
         user.setAttacking(true);

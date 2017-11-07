@@ -49,13 +49,16 @@ public abstract class Spell extends Special{
             damage = (int) (baseDamage * (wisdom / 5.0));
         else if (25 <= wisdom && wisdom < 50)
             damage = (int) (baseDamage * (wisdom / 10.0) + (baseDamage * 2.4));
-        else if (wisdom > 50)
+        else if (wisdom >= 50)
             damage = (int) (baseDamage * (wisdom / 20.0) + (baseDamage * 4.9));
         
-        //If the spell was critical, multiply the damage by 2
-        if (spellCrit(caster)){
-            System.out.println("It was a critical hit!");
-            damage *= 2;
+        //Only run critical hit calculations if critChance isn't 0
+        if (critChance > 0){
+            //If it was a critical hit, multiply the damage by 1.5
+            if (spellCrit(user)){
+                System.out.println("It was a critical hit!");
+                damage *= 1.5;
+            }
         }
         
         return damage;

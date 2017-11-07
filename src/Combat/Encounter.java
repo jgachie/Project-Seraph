@@ -33,8 +33,8 @@ public class Encounter {
         this.steps = dieRoll.nextInt(26) + 5; //Set the number of steps until the encounter is triggered (anywhere between 5 and 30)
         
         enemyParty.add(new Goblin(handler, enemyParty));
-        enemyParty.add(new Goblin(handler, enemyParty));
-        enemyParty.add(new Goblin(handler, enemyParty));
+        //enemyParty.add(new Goblin(handler, enemyParty));
+        //enemyParty.add(new Goblin(handler, enemyParty));
     }
     
     //GETTERS/SETTERS

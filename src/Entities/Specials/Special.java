@@ -20,7 +20,7 @@ public abstract class Special extends Entity{
     protected static Random dieRoll = new Random(); //A Random object for determining various outcomes
     public static final float DEFAULT_SPEED = 5.0f; //Special entity default speed
     public static final int DEFAULT_ANIMATION_SPEED = 100; //Special entity default animation speed
-    public static final int DEFAULT_SPECIAL_WIDTH = 32, DEFAULT_SPECIAL_HEIGHT = 32; //Special entity default width/height
+    public static final int DEFAULT_WIDTH = 32, DEFAULT_HEIGHT = 32; //Special entity default width/height
     
     protected float speed; //How fast the special entity moves
     protected float xMove, yMove; //Movement buffers; holds amount of pixels moved and is added to position later to show movement

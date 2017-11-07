@@ -100,26 +100,23 @@ public abstract class PlayableActor extends Actor{
         tome.getSkills().get(skillNum).use(this, target, handler);
     }
     
-    /**
-     * Tests dexterity and skill against given base chance of success to determine whether a skill hits
-     * or not
-     * @param baseChance The skill's base chance of success
-     * @return True if the skill hit; false if it missed
-     */
-    private boolean skillHit(int baseChance){
-        //Will implement later
-        return true;
-    }
-    
     public void useItem(Actor target, int itemID){
         //Will implement later
     }
     
     /**
-     * Increases or decreases a given stat by a given amount
-     * @param stat The name of the stat to be modified
-     * @param modify The amount of points by which the stat is to be modified
+     * Subtracts from the Actor's mana as a result of using a spell
+     * @param SP The amount of skillpoints the used skill takes
      */
+    public void useSkillpoints(int SP){
+        skillpoints -= SP; //Subtract the amount of skillpoints the skill uses from the Actor's current skillpoints
+        
+        //If the Actor's skillpoints falls to or below 0 (which should never happen), reset skillpoints to 0
+        if (skillpoints <= 0)
+            skillpoints = 0;
+    }
+    
+    @Override
     public void modifyStat(String stat, int modify){
         switch (stat.toUpperCase()){
             case "STRENGTH":

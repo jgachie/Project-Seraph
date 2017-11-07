@@ -34,23 +34,23 @@ public class Smog extends Spell{
                 0,
                 false,
                 true,
-                DEFAULT_SPECIAL_WIDTH,
-                DEFAULT_SPECIAL_HEIGHT);
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT);
     }
 
     @Override
     public void tick() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void render(Graphics g) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     protected BufferedImage getCurrentAnimationFrame() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
     
     @Override
@@ -75,7 +75,7 @@ public class Smog extends Spell{
         System.out.println("The enemy party's dexterity fell by 2!");
         
         //Decrease the dexterity of each of the enemy's party members by 2
-        for (Enemy member : enemy.getEnemyParty())
+        for (Enemy member : enemy.getParty())
             member.modifyStat("Dexterity", -2);
     }
 }

@@ -410,14 +410,14 @@ public abstract class Actor extends Creature{
     /**
      * Inflicts the Actor with a temporary status effect
      * @param effect The status effect to be inflicted
-     * @param expires The turn on which the effect expires
+     * @param expires The amount of turns after which the effect expires
      */
     public void addTempEffect(StatusEffect effect, int expires){
         //If the effect is already in the HashMap (returns a non-null value), do nothing and return
         if (tempEffects.get(effect) != null)
             return;
         
-        tempEffects.put(effect, expires); //Add the effect to the HashMap
+        tempEffects.put(effect, handler.getCombat().getNumTurns() + expires); //Add the effect to the HashMap
         addEffect(effect); //Apply the effect to the Actor
     }
     
@@ -430,6 +430,15 @@ public abstract class Actor extends Creature{
         if (tempEffects.get(effect) == null)
             return;
         
+        UITextBox.resetBAOS();
+        System.out.println(name + "'s " + effect.getValue() + " wore off!");
+        
+        //If the effect modifies Actor stats, iterate through the list of modified stats and revert them to normal
+        if (effect.getStats().length > 0){
+            for (int i = 0; i < effect.getStats().length; i++)
+                modifyStat(effect.getStats()[i], -effect.getModifiers()[i]);
+        }
+        
         tempEffects.remove(effect); //Remove the effect from the HashMap
         removeEffect(effect); //Remove the effect from the Actor
     }
@@ -439,7 +448,7 @@ public abstract class Actor extends Creature{
      * @param turn The number of the current turn
      */
     public void updateStatus(int turn){
-        Iterator it = tempEffects.entrySet().iterator(); //Create an Iterator for iterating through the HashMap
+        Iterator it = tempEffects.entrySet().iterator(); //Create an Iterator for running through the HashMap
         
         //Run through the HashMap of status effects
         while (it.hasNext()){
@@ -448,12 +457,12 @@ public abstract class Actor extends Creature{
             int expires = (int) entry.getValue(); //Store the turn on which the effect expires
             
             //If the current turn is the turn on which the effect expires, remove the effect from the Actor
-            if (expires >= turn)
+            if (expires == turn)
                 removeTempEffect(effect);
             
             Combat.delay(); //Run the Combat delay
             
-            it.remove(); //Avoids a ConcurrentModificationException... whatever the fuck that is...
+            //it.remove(); //Avoids a ConcurrentModificationException... whatever the fuck that is... [Commented out for now because it threw the exact error it was meant to avoid, and I'm really not sure what it does]
         }
     }
     
@@ -551,6 +560,13 @@ public abstract class Actor extends Creature{
      * @return A BufferedImage containing the current frame of the animation
      */
     protected abstract BufferedImage getCurrentAnimationFrame();
+    
+    /**
+     * Increases or decreases a given stat by a given amount
+     * @param stat The name of the stat to be modified
+     * @param modify The amount of points by which the stat is to be modified
+     */
+    protected abstract void modifyStat(String stat, int modify);
     
     //GETTERS/SETTERS
     

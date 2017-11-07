@@ -32,8 +32,8 @@ public class Enrage extends Spell{
                 0,
                 true,
                 false,
-                DEFAULT_SPECIAL_WIDTH,
-                DEFAULT_SPECIAL_HEIGHT);
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT);
     }
 
     @Override

@@ -58,13 +58,7 @@ public class Combat implements Runnable{
     public void run(){
         init(); //Initialize...stuff
         
-        //Temporary; displays Actor info
-        UITextBox.resetBAOS();
-        for (Actor actor : actors){
-            System.out.print(actor.getName() + " - ");
-            System.out.println("HP: " + actor.getHitpoints() + '/' + actor.getMaxHP());
-            System.out.println("MP: " + actor.getMana() + '/' + actor.getMaxMP() + "\n");
-        }
+        actorStatus(); //Display actor status
         
         //While both parties have at least one living member each, run the combat logic
         combatLoop:
@@ -124,31 +118,16 @@ public class Combat implements Runnable{
                     if (actor.isFleeing())
                         break combatLoop;
                 }
-                
-                //Print status of Actors to screen
-                UITextBox.resetBAOS();
-                for (Actor actorr : actors){
-                    System.out.print(actorr.getName() + " - ");
-                    System.out.println("HP: " + actorr.getHitpoints() + '/' + actorr.getMaxHP());
-                    System.out.println("MP: " + actorr.getMana() + '/' + actorr.getMaxMP() + "\n");
-                }
             }
             
             //Iterate through each Actor and, if they're alive, update their status effects
             for (Actor actor : actors){
                 
-                if (actor.isAlive()){
+                if (actor.isAlive())
                     actor.updateStatus(numTurns);
-                }
-                
-                //Print status of Actors to screen
-                UITextBox.resetBAOS();
-                for (Actor actorr : actors){
-                    System.out.print(actorr.getName() + " - ");
-                    System.out.println("HP: " + actorr.getHitpoints() + '/' + actorr.getMaxHP());
-                    System.out.println("MP: " + actorr.getMana() + '/' + actorr.getMaxMP() + "\n");
-                }
             }
+            
+            actorStatus();
             
             numTurns++;
             
@@ -209,6 +188,28 @@ public class Combat implements Runnable{
     }
     
     /**
+     * Prints out the status of all of the Actors in combat
+     */
+    private void actorStatus(){
+        UITextBox.resetBAOS();
+        for (PlayableActor member : party){
+            System.out.println(member.getName());
+            System.out.println("    HP: " + member.getHitpoints() + '/' + member.getMaxHP());
+            System.out.println("    MP: " + member.getMana() + '/' + member.getMaxMP());
+            System.out.println("    SP: " + member.getSkillpoints() + '/' + member.getMaxSP());
+        }
+        
+        System.out.print("|"); //Print a pipe to let the textbox know to separate the text into sections
+        
+        for (Enemy member : enemyParty){
+            System.out.println(member.getName());
+            System.out.println("    HP: " + member.getHitpoints() + '/' + member.getMaxHP());
+            System.out.println("    MP: " + member.getMana() + '/' + member.getMaxMP());
+            System.out.println("");
+        }
+    }
+    
+    /**
      * Makes the Combat thread wait until animations complete
      */
     public void animationDelay(){
@@ -234,7 +235,7 @@ public class Combat implements Runnable{
     }
     
     /**
-     * Sleeps the thread for a given duration; used so that combat calculations and outcomes aren't 
+     * Sleeps the thread for a given duration; used so that combat calculations and outcomes aren't
      * displayed all at once
      * @param time The amount of time for which the Thread is to sleep
      */

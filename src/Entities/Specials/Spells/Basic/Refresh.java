@@ -34,7 +34,7 @@ public class Refresh extends Spell{
                 10,
                 true,
                 false,
-                DEFAULT_SPECIAL_WIDTH,
+                DEFAULT_WIDTH,
                 48);
         
         //Initialize animations

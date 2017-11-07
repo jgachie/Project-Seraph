@@ -5,26 +5,26 @@
 */
 package UI;
 
-import Graphics.Assets;
+import Entities.Creatures.Actors.Actor;
+import Entities.Creatures.Actors.Enemies.Enemy;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
+import States.CombatState;
+import States.State;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Soup
  */
 public class UITextBox extends UIObject{
-    private static ByteArrayOutputStream baos = new ByteArrayOutputStream(); //A ByteArrayOutputStream to be fed into the PrintStream
-    private static PrintStream stream = new PrintStream(baos, true); //The new PrintStream that prints to the textbox
-    private static PrintStream oldStream = System.out; //The old PrintStream
+    private static final ByteArrayOutputStream baos = new ByteArrayOutputStream(); //A ByteArrayOutputStream to be fed into the PrintStream
+    private static final PrintStream stream = new PrintStream(baos, true); //The new PrintStream that prints to the textbox
+    private static final PrintStream oldStream = System.out; //The old PrintStream
     
     private BufferedImage image; //The image of the text box itself
     
@@ -35,6 +35,7 @@ public class UITextBox extends UIObject{
     
     @Override
     public void tick() {
+        
     }
     
     @Override
@@ -46,13 +47,18 @@ public class UITextBox extends UIObject{
             g.setColor(Color.white); //Set the text color
             g.setFont(new Font("Felix Titling", Font.BOLD, 18)); //Set the text font
             
-            String text = writeText();
+            String text = writeText(); //Write the contents of the BAOS into a text buffer
+            String[] sections = text.split("\\|"); //Mostly only used during combat; a secondary text buffer that splits text up into chunks so they can be displayed to different parts of the text box
             
-            String[] lines = text.split("\n"); //Split the text buffer into separate Strings by newline characters
-            
-            //Print each String on a separate line by iterating through the array and increasing the y-coordinate by the font height multiplied by the index of the array
-            for (int i = 0; i < lines.length; i++){
-                g.drawString(lines[i], (int) x + 20, (int) y + 30 + (g.getFontMetrics().getHeight() * i));
+            //Iterate through the sections of text and print each one separately
+            for (int i = 0; i < sections.length; i++){
+                String[] lines = sections[i].split("\n"); //Split the section buffer into separate Strings by newline characters
+                
+                //Print each String on a separate line by iterating through the array and increasing the y-coordinate by the font height multiplied by the index of the array
+                for (int j = 0; j < lines.length; j++){
+                    //The x-coordinate increases by 250 with each section to create a clear divide
+                    g.drawString(lines[j], (int) x + 20 + (500 * i), (int) y + 30 + (g.getFontMetrics().getHeight() * j));
+                }
             }
         }
     }

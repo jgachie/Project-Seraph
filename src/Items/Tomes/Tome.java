@@ -25,7 +25,7 @@ public class Tome extends Equipment{
     public static Tome[] tomes = new Tome[256];
     public static Tome basicTome = new Tome(Assets.stone, "Basic Tome", "T001", new int[]{0, 0, 3, 3, 0, 0, 0, 0},
             TomeType.BASIC, new ArrayList<Skill>(){{
-                add(new TaintedEdge());
+                add(new TaintedEdge()); add(new Accelerate()); add(new DragonSkin()); add(new ShadowStrike()); add(new Nightmare());
             }});
     
     protected final TomeType TYPE; //The tome's type

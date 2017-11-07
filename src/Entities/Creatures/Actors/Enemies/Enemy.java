@@ -28,11 +28,7 @@ public abstract class Enemy extends Actor{
     
     public abstract void decide(ArrayList<PlayableActor> party);
     
-    /**
-     * Increases or decreases a given stat by a given amount
-     * @param stat The name of the stat to be modified
-     * @param modify The amount of points by which the stat is to be modified
-     */
+    @Override
     public void modifyStat(String stat, int modify){
         switch (stat.toUpperCase()){
             case "STRENGTH":
@@ -62,11 +58,11 @@ public abstract class Enemy extends Actor{
         }
     }
 
-    public ArrayList<Enemy> getEnemyParty() {
+    public ArrayList<Enemy> getParty() {
         return enemyParty;
     }
 
-    public void setEnemyParty(ArrayList<Enemy> enemyParty) {
+    public void setParty(ArrayList<Enemy> enemyParty) {
         this.enemyParty = enemyParty;
     }
 }

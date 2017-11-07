@@ -96,7 +96,7 @@ public class World {
         
         //Button initialization 
         //<editor-fold defaultstate="collapsed" desc="Attack button">
-        attackButton = new UIImageButton("Attack", 50,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+        attackButton = new UIImageButton("Attack", 50,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -111,7 +111,7 @@ public class World {
                 
                 //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
                 if (enemy.isAlive()){
-                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * i),  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * i),  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                         //Load Actor's action buffer with method call
                         actor.setAction(() -> {
                             actor.attack(enemy); //Attack
@@ -134,7 +134,7 @@ public class World {
             }
             
             //Create a back button so the Player can reverse their decision
-            firstBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+            firstBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                 //Clean up all the buttons created
                 for (UIImageButton button : targetButtons)
                     uiManager.removeObject(button);
@@ -149,7 +149,7 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Spell button">
-        spellButton = new UIImageButton("Cast Spell", 200,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+        spellButton = new UIImageButton("Cast Spell", 200,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -162,7 +162,7 @@ public class World {
             for (int i = 0; i < spells.size(); i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
                 
-                spellButtons.add(new UIImageButton(spells.get(index).getName(), 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                spellButtons.add(new UIImageButton(spells.get(index).getName(), 50 + (150 * index), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                     for (UIImageButton buttons : spellButtons)
                         uiManager.removeObject(buttons);
                     
@@ -196,7 +196,7 @@ public class World {
                                 
                                 //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
                                 if (enemy.isAlive()){
-                                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                                         //Load Actor's action buffer with method call
                                         actor.setAction(() -> {
                                             actor.castSpell(enemy, index, handler); //Cast spell
@@ -246,7 +246,7 @@ public class World {
                                 
                                 //If the ally is alive, create abutton for it so it can be targeted; if not, do nothing
                                 if (ally.isAlive()){
-                                    targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                                    targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                                         //Load Actor's action buffer with method call
                                         actor.setAction(() -> {
                                             actor.castSpell(ally, index, handler); //Cast spell
@@ -273,7 +273,7 @@ public class World {
                     }
                     
                     //Create a back button so the Player can reverse their decision
-                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                         //Clean up all the buttons created
                         for (UIImageButton button : targetButtons)
                             uiManager.removeObject(button);
@@ -290,7 +290,7 @@ public class World {
             }
             
             //Create a back button so the Player can reverse their decision
-            firstBackButton = new UIImageButton("Back", 50 + (150 * spellButtons.size()), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+            firstBackButton = new UIImageButton("Back", 50 + (150 * spellButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                 //Clean up all the buttons created
                 for (UIImageButton button : spellButtons)
                     uiManager.removeObject(button);
@@ -305,7 +305,7 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Skill button">
-        skillButton = new UIImageButton("Use Skill", 350,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+        skillButton = new UIImageButton("Use Skill", 350,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -318,7 +318,7 @@ public class World {
             for (int i = 0; i < skills.size(); i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
                 
-                skillButtons.add(new UIImageButton(skills.get(index).getName(), 50 + (150 * index), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                skillButtons.add(new UIImageButton(skills.get(index).getName(), 50 + (150 * index), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                     for (UIImageButton buttons : skillButtons)
                         uiManager.removeObject(buttons);
                     
@@ -352,7 +352,7 @@ public class World {
                                 
                                 //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
                                 if (enemy.isAlive()){
-                                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                                         //Load Actor's action buffer with method call
                                         actor.setAction(() -> {
                                             actor.useSkill(enemy, index, handler); //Cast skill
@@ -402,7 +402,7 @@ public class World {
                                 
                                 //If the ally is alive, create abutton for it so it can be targeted; if not, do nothing
                                 if (ally.isAlive()){
-                                    targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                                    targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                                         //Load Actor's action buffer with method call
                                         actor.setAction(() -> {
                                             actor.useSkill(ally, index, handler); //Cast skill
@@ -429,7 +429,7 @@ public class World {
                     }
                     
                     //Create a back button so the Player can reverse their decision
-                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                         //Clean up all the buttons created
                         for (UIImageButton button : targetButtons)
                             uiManager.removeObject(button);
@@ -446,7 +446,7 @@ public class World {
             }
             
             //Create a back button so the Player can reverse their decision
-            firstBackButton = new UIImageButton("Back", 50 + (150 * skillButtons.size()), handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+            firstBackButton = new UIImageButton("Back", 50 + (150 * skillButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
                 //Clean up all the buttons created
                 for (UIImageButton button : skillButtons)
                     uiManager.removeObject(button);
@@ -461,7 +461,7 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Item button">
-        itemButton = new UIImageButton("Use Item", 500,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+        itemButton = new UIImageButton("Use Item", 500,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -471,7 +471,7 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Flee button">
-        fleeButton = new UIImageButton("Flee", 650,  handler.getHeight() - 150, 128, 64, true, Assets.btn, () -> {
+        fleeButton = new UIImageButton("Flee", 650,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;

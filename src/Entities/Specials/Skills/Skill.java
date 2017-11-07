@@ -1,8 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Entities.Specials.Skills;
 
 import Entities.Creatures.Actors.Actor;
@@ -55,13 +55,16 @@ public abstract class Skill extends Special{
             damage = (int) (baseDamage * (skill / 5.0));
         else if (25 <= skill && skill < 50)
             damage = (int) (baseDamage * (skill / 10.0) + (baseDamage * 2.4));
-        else if (skill > 50)
+        else if (skill >= 50)
             damage = (int) (baseDamage * (skill / 20.0) + (baseDamage * 4.9));
         
-        //If it was a critical hit, multiply the damage by 2
-        if (skillCrit(user)){
-            System.out.println("It was a critical hit!");
-            damage *= 2;
+        //Only run critical hit calculations if critChance isn't 0
+        if (critChance > 0){
+            //If it was a critical hit, multiply the damage by 1.5
+            if (skillCrit(user)){
+                System.out.println("It was a critical hit!");
+                damage *= 1.5;
+            }
         }
         
         return damage;
