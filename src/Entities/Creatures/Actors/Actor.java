@@ -6,10 +6,12 @@
 package Entities.Creatures.Actors;
 
 import Combat.Combat;
+import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Creatures.Actors.PlayableActors.Player;
 import Enums.StatusEffect;
 import Enums.DamageType;
 import Entities.Creatures.Creature;
+import Entities.Specials.Skills.Basic.DragonSkin;
 import Enums.Characters;
 import Items.Equipment.Weapon;
 import Main.Handler;
@@ -57,6 +59,7 @@ public abstract class Actor extends Creature{
     protected int crushDef; //Actor's crush defense stat; determines damage absorbed from crush attacks
     protected int pierceDef; //Actor's pierce defense stat; determines damage absorbed from pierce attacks (mostly ranged attacks)
     protected int magicDef; //Actor's magic defense stat; determines damage absorbed from non-elemental magic attacks
+    protected int chaosDef; //Actor's chaos defense stat; determines damage absorbed from chaos attacks
     protected int fireDef; //Actor's fire defense stat; determines damage absorbed from fire attacks
     protected int iceDef; //Actor's water defense stat; determines damage absorbed from water attacks
     protected int earthDef; //Actor's earth defense stat; determines damage absorbed from earth attacks
@@ -133,7 +136,7 @@ public abstract class Actor extends Creature{
         
         damage = calcAttackDamage();
         
-        damage = target.calcDamageReceived(damage, weapon.getType(), weapon.getEffect());
+        damage = target.calcDamageReceived(this, damage, weapon.getType(), weapon.getEffect());
         
         //TODO: Implement status effects
         
@@ -189,12 +192,13 @@ public abstract class Actor extends Creature{
     /**
      * Calculates total damage received by Actor by applying defense modifiers to damage dealt. Also
      * applies any status effects accompanied by attack.
-     * @param dmg The amount of damage dealt, before applying defense modifiers
+     * @param attacker The Actor attacking this one
+     * @param damage The amount of damage dealt, before applying defense modifiers
      * @param type The type of damage dealt
      * @param effect The status effect to be inflicted
      * @return The total damage received by the Actor
      */
-    public int calcDamageReceived(int damage, DamageType type, StatusEffect effect){
+    public int calcDamageReceived(Actor attacker, int damage, DamageType type, StatusEffect effect){
         /*
         Defense doesn't affect damage reduction directly; increasing defense increases damage type defenses
         (in addition to max hp), which in takeTurn are used in damage reduction calculations
@@ -203,14 +207,24 @@ public abstract class Actor extends Creature{
         switch (type){
             case SLASH:
                 //I'll take care of this shit later
+                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                    DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case STAB:
+                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                    DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case CRUSH:
+                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                    DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case PIERCE:
+                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                    DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case MAGIC:
+                break;
+            case CHAOS:
                 break;
             case FIRE:
                 break;
@@ -728,6 +742,14 @@ public abstract class Actor extends Creature{
     
     public void setMagicDef(int magicDef) {
         this.magicDef = magicDef;
+    }
+    
+    public int getChaosDef() {
+        return chaosDef;
+    }
+    
+    public void setChaosDef(int chaosDef) {
+        this.chaosDef = chaosDef;
     }
     
     public int getFireDef() {

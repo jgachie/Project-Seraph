@@ -9,6 +9,7 @@ import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Specials.Skills.Skill;
+import Enums.DamageType;
 import Enums.StatusEffect;
 import Main.Handler;
 import UI.UITextBox;
@@ -71,5 +72,23 @@ public class DragonSkin extends Skill{
         System.out.println(user.getName() + "'s skin hardens into scales and a dark haze envelopes his body...");
         user.modifyStat("Defense", 3);
         System.out.println(user.getName() + "'s defense increased by 3!");
+    }
+    
+    /**
+     * Deals the recoil damage from being attacked while Dragon Skin is active
+     * @param actor The PlayableActor dealing damage
+     * @param target The Actor receiving damage
+     */
+    public static void dragonDamage(PlayableActor actor, Actor target){
+        double damageModifier = (.5 * dieRoll.nextDouble()); //Calculate damage modifier (should be from 0 to .5)
+        int damage = (int) (actor.getSkill() * damageModifier); //Calculate base damage from modifier and Actor's skill stat
+        
+        damage = target.calcDamageReceived(actor, damage, DamageType.CHAOS, StatusEffect.TOXIC); //Calculate damage dealt
+        
+        //If the damage wasn't completely negated, deal the damage to the target
+        if (damage > 0){
+            target.dealDamage(damage);
+            System.out.println(target.getName() + " took " + damage + " damage from Dragon Skin!");
+        }
     }
 }

@@ -15,6 +15,7 @@ public enum DamageType {
     CRUSH,
     PIERCE,
     MAGIC,
+    CHAOS,
     FIRE,
     ICE,
     EARTH,
