@@ -13,7 +13,6 @@ import UI.UITextBox;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import Combat.Combat;
-import Enums.DamageType;
 import Enums.StatusEffect;
 
 /**
@@ -25,11 +24,11 @@ public class TaintedEdge extends Skill{
     public TaintedEdge(){
         super("Tainted Edge",
                 "Sariel imbues his weapon with chaos energy and attacks the enemy. Deals a normal amount"
-                        + "of damage, but has a chance of poisoning the target. However, if the attack"
-                        + " misses, there is a slight chance that Sariel will wind up poisoning himself."
-                        + " Both chances scale with Chaos stat. (Cost: 15 CP)",
+                        + "of damage, but if the attack hits, the target will be poisoned as a result. "
+                        + "However, if it misses, there is a slight chance that Sariel will wind up "
+                        + "poisoning himself. Both chances scale with Chaos stat. (Cost: 15 CP)",
                 15,
-                30,
+                20,
                 6,
                 0,
                 0,
@@ -71,8 +70,10 @@ public class TaintedEdge extends Skill{
             System.out.println(user.getName() + " done goofed!");
             
             //If the user misses and lands a critical, they'll be poisoned
-            if (skillCrit(user))
+            if (skillCrit(user)){
                 user.addEffect(StatusEffect.POISON);
+                System.out.println(user.getName() + " was poisoned!");
+            }
             
             return;
         }
@@ -88,7 +89,7 @@ public class TaintedEdge extends Skill{
         damage = calcDamage(user);
         
         //Factor in enemy resistances
-        damage = target.calcDamageReceived(damage, user.getWeapon().getType(), StatusEffect.POISON);
+        damage = target.calcDamageReceived(user, damage, user.getWeapon().getType(), StatusEffect.POISON);
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
         if (damage > 0){

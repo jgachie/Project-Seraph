@@ -9,6 +9,7 @@ import Entities.Creatures.Actors.PlayableActors.Player;
 import Entities.Specials.Special;
 import Main.Handler;
 import java.awt.Graphics;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -17,12 +18,12 @@ import java.util.Iterator;
  *
  * @author Soup
  */
-public class EntityManager {
+public class EntityManager implements Serializable{
     private Handler handler; //Handler
     private Player player; //The player
     private ArrayList<Entity> entities; //ArrayList holding all of the entities in the game
     //Comparator to sort the entity list by bottom y-coordinate (lowest to highest) for render order
-    private Comparator<Entity> renderSorter = new Comparator<Entity>(){
+    private transient Comparator<Entity> renderSorter = new Comparator<Entity>(){
         /**
          * Compares Entities a and b to see which should render first
          */

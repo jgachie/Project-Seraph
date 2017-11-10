@@ -5,21 +5,25 @@
 */
 package Inventory;
 
+import Items.Item;
 import Main.Handler;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  *
  * @author Soup
  */
 public class Inventory implements Serializable{
-    private transient Handler handler;
-    private boolean active = false; //Whether the inventory should currently be open
+    private Handler handler; //The handler
+    private boolean active = false; //Whether the inventory should be ticked and rendered
+    private ArrayList<Item> inventory; //An ArrayList holding all of the items in the player's inventory
     
     public Inventory(Handler handler){
         this.handler = handler;
+        this.inventory = new ArrayList<Item>();
     }
     
     public void tick(){
@@ -38,7 +42,36 @@ public class Inventory implements Serializable{
             return;
     }
     
-    //Getters/Setters
+    /**
+     * Adds an item to the player's inventory
+     * @param item The item to be added to the inventory
+     */
+    public void addItem(Item item){
+        //Run through the inventory to see if the player is already holding an item of this type
+        for (Item i : inventory){
+            //If the player is holding the item, add the new instance's count to that of the old instance and return
+            if (i.getID().equals(item.getID())){
+                i.setCount(i.getCount() + item.getCount());
+                return;
+            }
+        }
+        
+        //If the player isn't holding any of that type of item, add the new item to their inventory
+        inventory.add(item);
+    }
+    
+    /**
+     * Removes an item from the player's inventory
+     * @param item The item to be removed from the inventory
+     */
+    public void removeItem(Item item){
+        //If the item is in the inventory, remove it
+        if (inventory.contains(item))
+            inventory.remove(item);
+    }
+    
+    //GETTERS/SETTERS
+    
     public Handler getHandler() {
         return handler;
     }
@@ -47,5 +80,11 @@ public class Inventory implements Serializable{
         this.handler = handler;
     }
     
+    public ArrayList<Item> getInventory() {
+        return inventory;
+    }
     
+    public void setInventory(ArrayList<Item> inventory) {
+        this.inventory = inventory;
+    }
 }

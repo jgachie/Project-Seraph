@@ -10,7 +10,6 @@ import Enums.StatusEffect;
 import Enums.Characters;
 import Enums.DamageType;
 import Graphics.Assets;
-import Main.Handler;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;

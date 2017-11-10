@@ -17,30 +17,48 @@ import States.*;
 import UI.UITextBox;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.InputMismatchException;
 
 /**
  *
  * @author Soup
  */
-public class Game implements Runnable{
+public class Game implements Runnable, Serializable{
+    //Input streams for loading the Game object during deserialization
+    private transient static FileInputStream fileIn;
+    private transient static ObjectInputStream objectIn;
+    
+    //Output streams for saving the Game object during serialization
+    private transient FileOutputStream fileOut;
+    private transient ObjectOutputStream objectOut;
+    
     private Display display; //Game window
     public String title; //Window title;
     private int width, height; //Window width/height
     
     private boolean running = false; //Whether the game is currently running or not
-    private Thread thread; //Main thread
+    private transient Thread thread; //Main thread
     
     //Graphics shit
-    private BufferStrategy bs;
-    private Graphics g;
+    private transient BufferStrategy bs;
+    private transient Graphics g;
     
     //States
-    private State gameState, menuState, pauseState;
+    private GameState gameState;
+    private MenuState menuState;
+    private PauseState pauseState;
     
     //Input
-    private KeyManager keyManager;
-    private MouseManager mouseManager;
+    private static transient KeyManager keyManager = new KeyManager();
+    private static transient MouseManager mouseManager = new MouseManager();
     
     //Camera
     private GameCamera gameCamera;
@@ -52,10 +70,6 @@ public class Game implements Runnable{
         this.width = width;
         this.height = height;
         this.title = title;
-        
-        //Initialize input managers
-        keyManager = new KeyManager();
-        mouseManager = new MouseManager();
     }
     
     /**
@@ -82,9 +96,9 @@ public class Game implements Runnable{
         new Player(handler, 0, 0, "Sariel").save();
         
         //State initialization
-        menuState = new MenuState(handler);
         gameState = new GameState(handler);
         pauseState = new PauseState(handler);
+        menuState = new MenuState(handler);
         State.setState(menuState); //Set current state to game state
         
         //Stream initializatoin
@@ -154,6 +168,46 @@ public class Game implements Runnable{
         stop();
     }
     
+    /**
+     * Saves the game at its current state to a given save file
+     * @param file The file to which the game is to be saved
+     */
+    public void save(File file){
+        try {
+            fileOut = new FileOutputStream(file);
+            objectOut = new ObjectOutputStream(fileOut);
+            objectOut.writeObject(this);
+            objectOut.close();
+        } catch(FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Loads the state of the game from a previous save file
+     * @param file The save file the game is to be loaded from
+     * @return The saved game object
+     */
+    public Game load(File file){
+        try{
+            fileIn = new FileInputStream(file);
+            objectIn = new ObjectInputStream(fileIn);
+            Game game = (Game) objectIn.readObject();
+            objectIn.close();
+            return game;
+        } catch(FileNotFoundException e){
+            e.printStackTrace();
+        } catch(ClassNotFoundException | IOException e){
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    //GETTERS/SETTERS
+    
     public State getState(String state){
         switch (state.toUpperCase()){
             case "MENU":
@@ -170,6 +224,7 @@ public class Game implements Runnable{
     public void setState(String state){
         switch (state.toUpperCase()){
             case "MENU":
+                handler.getMouseManager().setUIManager(menuState.getUIManager()); //Set the mouse manager's UI manager to the menu state's UI manager so it has control over the mouse
                 State.setState(menuState);
                 break;
             case "GAME":
@@ -179,6 +234,7 @@ public class Game implements Runnable{
                 State.setState(gameState);
                 break;
             case "PAUSE":
+                handler.getMouseManager().setUIManager(pauseState.getUIManager()); //Set the mouse manager's UI manager to the pause state's UI manager it has control over the mouse
                 State.setState(pauseState);
                 break;
             case "COMBAT":
@@ -189,6 +245,14 @@ public class Game implements Runnable{
             default:
                 throw new InputMismatchException(); //If you get here, you fucked up when trying to set the state
         }
+    }
+    
+    public void setHandler(Handler handler){
+        this.handler = handler;
+    }
+    
+    public Handler getHandler(){
+        return handler;
     }
     
     public KeyManager getKeyManager(){
@@ -211,6 +275,14 @@ public class Game implements Runnable{
         return height;
     }
     
+    public Thread getThread(){
+        return thread;
+    }
+    
+    public void setThread(Thread thread){
+        this.thread = thread;
+    }
+    
     /**
      * Starts the game
      */
@@ -221,6 +293,7 @@ public class Game implements Runnable{
         
         running = true;
         thread = new Thread(this);
+        thread.setName("Main Thread");
         thread.start();
     }
     
@@ -277,10 +350,11 @@ search for her lost son. Collecting all of the pages yields the player with a ne
 When equipped, it reduces the Player's Chaos stat by 8, and has the hidden effect of preventing high
 Chaos levels from making decisions for the Player.
 
+*Rynn is a man now; is the head of the rebellion forces; betrays Sariel and Theron in "true" ending 
+and becomes a tyrant.
+
 
 ***TO BE DECIDED***
-
-* Make Rynn a man.
 
 * Add an option at the beginning of the game for the player to choose the player character's gender.
 This could lead into romantic subplots in the game which would deepen significance of player-character

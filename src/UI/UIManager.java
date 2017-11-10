@@ -8,13 +8,14 @@ package UI;
 import Main.Handler;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author Soup
  */
-public class UIManager {
+public class UIManager implements Serializable{
     private Handler handler; //The handler
     private ArrayList<UIObject> objects; //ArrayList of all UIObjects used in the current state
     
@@ -65,13 +66,6 @@ public class UIManager {
      */
     public void removeObject(int index){
         objects.remove(index);
-    }
-    
-    /**
-     * Removes the object at the last index of the object list
-     */
-    public void removeLast(){
-        objects.remove(objects.size() - 1);
     }
 
     public Handler getHandler() {

@@ -10,8 +10,8 @@ import Main.Handler;
 import UI.ClickListener;
 import UI.UIImageButton;
 import UI.UIManager;
-import java.awt.Color;
 import java.awt.Graphics;
+import java.io.Serializable;
 
 /**
  *
@@ -30,7 +30,7 @@ public class MenuState extends State{
         create a subclass within the method call to satisfy it. Define the onClick() method to do whatever
         clicking on the button is supposed to do.
         */
-        uiManager.addObject(new UIImageButton("Start", handler.getWidth() / 2 - 64, handler.getHeight() / 2 - 32, 128, 64, true, Assets.btn, () -> {
+        uiManager.addObject(new UIImageButton("Start", handler.getWidth() / 2 - 64, handler.getHeight() / 2 - 32, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
             handler.getGame().setState("Game"); //When the button is clicked, start the game
         }));
     }
@@ -45,4 +45,11 @@ public class MenuState extends State{
         uiManager.render(g);
     }
     
+    public UIManager getUIManager(){
+        return uiManager;
+    }
+    
+    public void setUIManager(UIManager uiManager){
+        this.uiManager = uiManager;
+    }
 }

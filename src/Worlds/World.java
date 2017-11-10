@@ -16,20 +16,22 @@ import Graphics.Assets;
 import Main.Handler;
 import Entities.Specials.Spells.Spell;
 import Tiles.Tile;
+import UI.ClickListener;
 import UI.UIImageButton;
 import UI.UIManager;
 import UI.UITextBox;
 import Utils.Utils;
 import java.awt.Graphics;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author Soup
  */
-public class World {
+public class World implements Serializable{
     private Handler handler; //The game itself
-    private Combat combat; //The combat object
+    private transient Combat combat; //The combat object
     private int width, height; //Width/height in terms of tiles
     private int spawnX, spawnY; //X- and y-coordinates for player spawn point
     private int[][] tiles; //2D array tilemap containing IDs describing world in terms of tiles
@@ -94,9 +96,9 @@ public class World {
             enemyParty.get(i).setY(SPAWN_Y + (150 * i));
         }
         
-        //Button initialization 
+        //Button initialization
         //<editor-fold defaultstate="collapsed" desc="Attack button">
-        attackButton = new UIImageButton("Attack", 50,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+        attackButton = new UIImageButton("Attack", 50,  handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -108,33 +110,38 @@ public class World {
             for (int i = 0; i < enemyParty.size(); i++){
                 final int index = i;
                 Actor enemy = enemyParty.get(i); //The enemy mapped to this button
+                boolean clickable; //Whether the button can be clicked or not
                 
-                //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
-                if (enemy.isAlive()){
-                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * i),  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
-                        //Load Actor's action buffer with method call
-                        actor.setAction(() -> {
-                            actor.attack(enemy); //Attack
-                        });
-                        showButtons(); //Show the combat buttons again for the next Actor's turn
-                        synchronized(combat){
-                            combat.notifyAll(); //Let the combat thread know to move on
-                        }
-                        
-                        //Clean up the buttons created
-                        for (UIImageButton button : targetButtons)
-                            uiManager.removeObject(button);
-                        
-                        uiManager.removeObject(firstBackButton);
-                        targetButtons.clear();
-                    }));
+                //If the enemy is alive, make its button clickable; if not, make it unclickable
+                if (enemy.isAlive())
+                    clickable = true;
+                else
+                    clickable = false;
+                
+                //Create a button so the enemy can be targeted
+                targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * i),  handler.getHeight() - 75, 128, 64, true, clickable, Assets.btn, (ClickListener & Serializable)() -> {
+                    //Load Actor's action buffer with method call
+                    actor.setAction(() -> {
+                        actor.attack(enemy); //Attack
+                    });
+                    showButtons(); //Show the combat buttons again for the next Actor's turn
+                    synchronized(combat){
+                        combat.notifyAll(); //Let the combat thread know to move on
+                    }
                     
-                    uiManager.addObject(targetButtons.get(index)); //Add the new button to the UI Manager
-                }
+                    //Clean up the buttons created
+                    for (UIImageButton button : targetButtons)
+                        uiManager.removeObject(button);
+                    
+                    uiManager.removeObject(firstBackButton);
+                    targetButtons.clear();
+                }));
+                
+                uiManager.addObject(targetButtons.get(index)); //Add the new button to the UI Manager
             }
             
             //Create a back button so the Player can reverse their decision
-            firstBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+            firstBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
                 //Clean up all the buttons created
                 for (UIImageButton button : targetButtons)
                     uiManager.removeObject(button);
@@ -149,20 +156,28 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Spell button">
-        spellButton = new UIImageButton("Cast Spell", 200,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+        spellButton = new UIImageButton("Cast Spell", 200,  handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
             
-            PlayableActor actor = (PlayableActor) combat.getTurn(); //Get the Actor whose turn it is currently
+            PlayableActor actor = combat.getTurn(); //Get the Actor whose turn it is currently
             ArrayList<Spell> spells = actor.getGrimoire().getSpells(); //The names of the spells in the Actor's currently equipped grimoire
             hideButtons(); //Hide the combat buttons
             
             //Iterate through the Actor's Grimoire's spell names to create a button that refers to each one so the Player can select a spell
             for (int i = 0; i < spells.size(); i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
+                boolean clickable; //Whether or not the button can be clicked; will be determined based on how much mana the Actor has vs. how much mana the spell costs
                 
-                spellButtons.add(new UIImageButton(spells.get(index).getName(), 50 + (150 * index), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+                //If the Actor has enough mana to cast the spell, make the button clickable; otherwise, make it unclickable
+                if (actor.getMana() >= spells.get(index).getPointReq())
+                    clickable = true;
+                else
+                    clickable = false;
+                
+                //Create the actual spell button
+                spellButtons.add(new UIImageButton(spells.get(index).getName(), 50 + (150 * index), handler.getHeight() - 75, 128, 64, true, clickable, Assets.btn, (ClickListener & Serializable)() -> {
                     for (UIImageButton buttons : spellButtons)
                         uiManager.removeObject(buttons);
                     
@@ -193,31 +208,36 @@ public class World {
                             //Iterate through the enemy's party and create a button that refers to each one so the Player can select a target
                             for (int j = 0; j < enemyParty.size(); j++){
                                 Actor enemy = enemyParty.get(j); //The enemy mapped to this button
+                                boolean click; //Whether the button is clickable or not
                                 
-                                //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
-                                if (enemy.isAlive()){
-                                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
-                                        //Load Actor's action buffer with method call
-                                        actor.setAction(() -> {
-                                            actor.castSpell(enemy, index, handler); //Cast spell
-                                        });
-                                        
-                                        showButtons(); //Show the combat buttons again for the next Actor's turn
-                                        
-                                        synchronized(combat){
-                                            combat.notifyAll(); //Let the combat thread know to move on
-                                        }
-                                        
-                                        //Clean up the buttons created
-                                        for (UIImageButton button : targetButtons)
-                                            uiManager.removeObject(button);
-                                        
-                                        uiManager.removeObject(secondBackButton);
-                                        targetButtons.clear();
-                                    }));
+                                //If the enemy is alive, make its button clickable; if not, make it unclickable
+                                if (enemy.isAlive())
+                                    click = true;
+                                else
+                                    click = false;
+                                
+                                //Create a button for the enemy so they can be targeted
+                                targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 75, 128, 64, true, click, Assets.btn, (ClickListener & Serializable)() -> {
+                                    //Load Actor's action buffer with method call
+                                    actor.setAction(() -> {
+                                        actor.castSpell(enemy, index, handler); //Cast spell
+                                    });
                                     
-                                    uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
-                                }
+                                    showButtons(); //Show the combat buttons again for the next Actor's turn
+                                    
+                                    synchronized(combat){
+                                        combat.notifyAll(); //Let the combat thread know to move on
+                                    }
+                                    
+                                    //Clean up the buttons created
+                                    for (UIImageButton button : targetButtons)
+                                        uiManager.removeObject(button);
+                                    
+                                    uiManager.removeObject(secondBackButton);
+                                    targetButtons.clear();
+                                }));
+                                
+                                uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
                             }
                         }
                     }
@@ -243,37 +263,42 @@ public class World {
                             //Iterate through the Player's party and create a button that refers to each one so the Player can select a target
                             for (int j = 0; j < actor.getParty().size(); j++){
                                 Actor ally = actor.getParty().get(j);
+                                boolean click; //Whether the button is clickable or not
                                 
-                                //If the ally is alive, create abutton for it so it can be targeted; if not, do nothing
-                                if (ally.isAlive()){
-                                    targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
-                                        //Load Actor's action buffer with method call
-                                        actor.setAction(() -> {
-                                            actor.castSpell(ally, index, handler); //Cast spell
-                                        });
-                                        
-                                        showButtons(); //Show the combat buttons again for the next Actor's turn
-                                        
-                                        synchronized (combat){
-                                            combat.notifyAll(); //Let the combat thread know to move on
-                                        }
-                                        
-                                        //Clean up all the buttons created
-                                        for (UIImageButton button : targetButtons)
-                                            uiManager.removeObject(button);
-                                        
-                                        uiManager.removeObject(secondBackButton);
-                                        targetButtons.clear();
-                                    }));
+                                //If the ally is alive, make its button clickable; if not, make it unclickable
+                                if (ally.isAlive())
+                                    click = true;
+                                else
+                                    click = false;
+                                
+                                //Create a button for the ally so it can be targeted
+                                targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
+                                    //Load Actor's action buffer with method call
+                                    actor.setAction(() -> {
+                                        actor.castSpell(ally, index, handler); //Cast spell
+                                    });
                                     
-                                    uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
-                                }
+                                    showButtons(); //Show the combat buttons again for the next Actor's turn
+                                    
+                                    synchronized (combat){
+                                        combat.notifyAll(); //Let the combat thread know to move on
+                                    }
+                                    
+                                    //Clean up all the buttons created
+                                    for (UIImageButton button : targetButtons)
+                                        uiManager.removeObject(button);
+                                    
+                                    uiManager.removeObject(secondBackButton);
+                                    targetButtons.clear();
+                                }));
+                                
+                                uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
                             }
                         }
                     }
                     
                     //Create a back button so the Player can reverse their decision
-                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
                         //Clean up all the buttons created
                         for (UIImageButton button : targetButtons)
                             uiManager.removeObject(button);
@@ -290,7 +315,7 @@ public class World {
             }
             
             //Create a back button so the Player can reverse their decision
-            firstBackButton = new UIImageButton("Back", 50 + (150 * spellButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+            firstBackButton = new UIImageButton("Back", 50 + (150 * spellButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
                 //Clean up all the buttons created
                 for (UIImageButton button : spellButtons)
                     uiManager.removeObject(button);
@@ -305,20 +330,27 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Skill button">
-        skillButton = new UIImageButton("Use Skill", 350,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+        skillButton = new UIImageButton("Use Skill", 350,  handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
             
-            PlayableActor actor = (PlayableActor) combat.getTurn(); //Get the Actor whose turn it is currently
+            PlayableActor actor = combat.getTurn(); //Get the Actor whose turn it is currently
             ArrayList<Skill> skills = actor.getTome().getSkills(); //The names of the skills in the Actor's currently equipped tome
             hideButtons(); //Hide the combat buttons
             
             //Iterate through the Actor's Grimoire's skill names to create a button that refers to each one so the Player can select a skill
             for (int i = 0; i < skills.size(); i++){
                 final int index = i; //Necessary because Java is fucking ridiculous; essentially replaces "i" in the loop
+                boolean clickable; //Whether the button is clickable or not
                 
-                skillButtons.add(new UIImageButton(skills.get(index).getName(), 50 + (150 * index), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+                //If the Actor has enough skillpoints to use the skill, make the button clickable; if not, make it unclickable
+                if (actor.getSkillpoints() >= skills.get(index).getPointReq())
+                    clickable = true;
+                else
+                    clickable = false;
+                
+                skillButtons.add(new UIImageButton(skills.get(index).getName(), 50 + (150 * index), handler.getHeight() - 75, 128, 64, true, clickable, Assets.btn, (ClickListener & Serializable)() -> {
                     for (UIImageButton buttons : skillButtons)
                         uiManager.removeObject(buttons);
                     
@@ -349,31 +381,36 @@ public class World {
                             //Iterate through the enemy's party and create a button that refers to each one so the Player can select a target
                             for (int j = 0; j < enemyParty.size(); j++){
                                 Actor enemy = enemyParty.get(j); //The enemy mapped to this button
+                                boolean click; //Whether the button is clickable or not
                                 
-                                //If the enemy is alive, create a button for it so it can be targeted; if not, do nothing
-                                if (enemy.isAlive()){
-                                    targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
-                                        //Load Actor's action buffer with method call
-                                        actor.setAction(() -> {
-                                            actor.useSkill(enemy, index, handler); //Cast skill
-                                        });
-                                        
-                                        showButtons(); //Show the combat buttons again for the next Actor's turn
-                                        
-                                        synchronized(combat){
-                                            combat.notifyAll(); //Let the combat thread know to move on
-                                        }
-                                        
-                                        //Clean up the buttons created
-                                        for (UIImageButton button : targetButtons)
-                                            uiManager.removeObject(button);
-                                        
-                                        uiManager.removeObject(secondBackButton);
-                                        targetButtons.clear();
-                                    }));
+                                //If the enemy is alive, make its button clickable; if not, make it unclickable
+                                if (enemy.isAlive())
+                                    click = true;
+                                else
+                                    click = false;
+                                
+                                //Create a button for the enemy so it can be targeted
+                                targetButtons.add(new UIImageButton(enemy.getName(), 50 + (150 * j),  handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
+                                    //Load Actor's action buffer with method call
+                                    actor.setAction(() -> {
+                                        actor.useSkill(enemy, index, handler); //Cast skill
+                                    });
                                     
-                                    uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
-                                }
+                                    showButtons(); //Show the combat buttons again for the next Actor's turn
+                                    
+                                    synchronized(combat){
+                                        combat.notifyAll(); //Let the combat thread know to move on
+                                    }
+                                    
+                                    //Clean up the buttons created
+                                    for (UIImageButton button : targetButtons)
+                                        uiManager.removeObject(button);
+                                    
+                                    uiManager.removeObject(secondBackButton);
+                                    targetButtons.clear();
+                                }));
+                                
+                                uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
                             }
                         }
                     }
@@ -399,37 +436,42 @@ public class World {
                             //Iterate through the Player's party and create a button that refers to each one so the Player can select a target
                             for (int j = 0; j < actor.getParty().size(); j++){
                                 Actor ally = actor.getParty().get(j);
+                                boolean click; //Whether the button is clickable or not
                                 
-                                //If the ally is alive, create abutton for it so it can be targeted; if not, do nothing
-                                if (ally.isAlive()){
-                                    targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
-                                        //Load Actor's action buffer with method call
-                                        actor.setAction(() -> {
-                                            actor.useSkill(ally, index, handler); //Cast skill
-                                        });
-                                        
-                                        showButtons(); //Show the combat buttons again for the next Actor's turn
-                                        
-                                        synchronized (combat){
-                                            combat.notifyAll(); //Let the combat thread know to move on
-                                        }
-                                        
-                                        //Clean up all the buttons created
-                                        for (UIImageButton button : targetButtons)
-                                            uiManager.removeObject(button);
-                                        
-                                        uiManager.removeObject(secondBackButton);
-                                        targetButtons.clear();
-                                    }));
+                                //If the ally is alive, make its button clickable; if not, make it unclickable
+                                if (ally.isAlive())
+                                    click = true;
+                                else
+                                    click = false;
+                                
+                                //Create a button for the ally so it can be targeted
+                                targetButtons.add(new UIImageButton(ally.getName(), 50 + (150 * j), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
+                                    //Load Actor's action buffer with method call
+                                    actor.setAction(() -> {
+                                        actor.useSkill(ally, index, handler); //Cast skill
+                                    });
                                     
-                                    uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
-                                }
+                                    showButtons(); //Show the combat buttons again for the next Actor's turn
+                                    
+                                    synchronized (combat){
+                                        combat.notifyAll(); //Let the combat thread know to move on
+                                    }
+                                    
+                                    //Clean up all the buttons created
+                                    for (UIImageButton button : targetButtons)
+                                        uiManager.removeObject(button);
+                                    
+                                    uiManager.removeObject(secondBackButton);
+                                    targetButtons.clear();
+                                }));
+                                
+                                uiManager.addObject(targetButtons.get(j)); //Add the new button to the UI Manager
                             }
                         }
                     }
                     
                     //Create a back button so the Player can reverse their decision
-                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+                    secondBackButton = new UIImageButton("Back", 50 + (150 * targetButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
                         //Clean up all the buttons created
                         for (UIImageButton button : targetButtons)
                             uiManager.removeObject(button);
@@ -446,7 +488,7 @@ public class World {
             }
             
             //Create a back button so the Player can reverse their decision
-            firstBackButton = new UIImageButton("Back", 50 + (150 * skillButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+            firstBackButton = new UIImageButton("Back", 50 + (150 * skillButtons.size()), handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
                 //Clean up all the buttons created
                 for (UIImageButton button : skillButtons)
                     uiManager.removeObject(button);
@@ -461,7 +503,7 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Item button">
-        itemButton = new UIImageButton("Use Item", 500,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+        itemButton = new UIImageButton("Use Item", 500,  handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
@@ -471,17 +513,20 @@ public class World {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Flee button">
-        fleeButton = new UIImageButton("Flee", 650,  handler.getHeight() - 75, 128, 64, true, Assets.btn, () -> {
+        fleeButton = new UIImageButton("Flee", 650,  handler.getHeight() - 75, 128, 64, true, Assets.btn, (ClickListener & Serializable)() -> {
             //If the combat thread isn't ready yet, do nothing and return
             if (!combat.isReady())
                 return;
             
             PlayableActor actor = combat.getTurn(); //Get the Actor whose turn it is currently
+            
             //Load Actor's action buffer with method call
             actor.setAction(() -> {
                 actor.flee(); //Flee
             });
+            
             showButtons(); //Show the combat buttons again for the next Actor's turn
+            
             synchronized(combat){
                 combat.notifyAll(); //Let the combat thread know to move on
             }
@@ -502,6 +547,26 @@ public class World {
     public void tick(){
         entityManager.tick();
         uiManager.tick();
+        
+        //If combat is currently active and the combat thread is read for input, make the buttons clickable. If it's not ready, make them unclickable
+        if (combat != null){
+            synchronized(combat){
+                if (combat.isReady()){
+                    attackButton.setClickable(true);
+                    spellButton.setClickable(true);
+                    skillButton.setClickable(true);
+                    itemButton.setClickable(true);
+                    fleeButton.setClickable(true);
+                }
+                else{
+                    attackButton.setClickable(false);
+                    spellButton.setClickable(false);
+                    skillButton.setClickable(false);
+                    itemButton.setClickable(false);
+                    fleeButton.setClickable(false);
+                }
+            }
+        }
     }
     
     public void render(Graphics g){

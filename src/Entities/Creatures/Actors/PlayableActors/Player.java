@@ -11,6 +11,7 @@ import Graphics.Animation;
 import Graphics.Assets;
 import Inventory.Inventory;
 import Items.Equipment.Weapon;
+import Items.UsableItems.Potion;
 import Main.Handler;
 import States.CombatState;
 import java.awt.image.BufferedImage;
@@ -31,7 +32,7 @@ public class Player extends PlayableActor{
     private static Animation fightUp, fightDown, fightLeft, fightRight;
     private static Animation attack, cast, fight;
     
-    private Inventory inv; //The Player's inventory
+    private final Inventory inv; //The Player's inventory
     
     public Player(Handler handler, float x, float y, String name){
         super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Characters.SARIEL,
@@ -55,6 +56,7 @@ public class Player extends PlayableActor{
         
         //Initialize other shit
         inv = new Inventory(handler);
+        inv.addItem(new Potion());
         party.add(this); //Add the player to the party
     }
     
@@ -106,6 +108,7 @@ public class Player extends PlayableActor{
     
     @Override
     public void tick(){
+        inv.tick();
         
         //Combat ticking rules
         if (State.getState() instanceof CombatState){
@@ -145,7 +148,6 @@ public class Player extends PlayableActor{
         getInput(); //Get Player input
         move(); //Apply input and move Player entity
         handler.getGameCamera().centerOnEntity(this); //Center camera on Player entity
-        //inv.tick(); //Commented out for now; don't really know when (or even why) inventory should be ticked
     }
     
     /**
@@ -171,6 +173,8 @@ public class Player extends PlayableActor{
     
     @Override
     public void render(Graphics g){
+        inv.render(g);
+        
         BufferedImage frame = getCurrentAnimationFrame();
         
         //If the Player is in combat, render normally, but without the camera offsets
@@ -182,7 +186,6 @@ public class Player extends PlayableActor{
         //Subtract offset from position to focus camera on Player
         g.drawImage(frame, (int) (x - handler.getGameCamera().getXOffset()),
                 (int) (y - handler.getGameCamera().getYOffset()), frame.getWidth() * 2, frame.getHeight() * 2, null);
-        //inv.render(g); //Commented out for now; don't really know when (or even why) inventory should be rendered
     }
     
     @Override
@@ -242,5 +245,11 @@ public class Player extends PlayableActor{
     public void resetAnimations(){
         cast.setCompleted(false);
         attack.setCompleted(false);
+    }
+    
+    //GETTERS/SETTERS
+    
+    public Inventory getInventory() {
+        return inv;
     }
 }

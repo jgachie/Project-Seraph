@@ -5,11 +5,10 @@
  */
 package States;
 
-import Entities.Creatures.Actors.PlayableActors.Player;
-import Entities.Statics.Tree;
 import Main.Handler;
 import Worlds.World;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 
 /**
  *
@@ -29,6 +28,10 @@ public class GameState extends State{
         //Switch to menu state when scroll button is pressed
         if (handler.getMouseManager().isMiddlePressed())
             handler.getGame().setState("Menu");
+        
+        //Switch to pause state when Enter key is pressed
+        if (handler.getKeyManager().keyJustPressed(KeyEvent.VK_ENTER))
+            handler.getGame().setState("Pause");
         
         world.tick();
     }

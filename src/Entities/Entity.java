@@ -14,7 +14,7 @@ import java.io.Serializable;
  * @author Soup
  */
 public abstract class Entity implements Serializable{
-    protected transient Handler handler; //The handler
+    protected Handler handler; //The handler
     protected float x, y; //X and Y positions
     protected int width, height; //Width/height of the entity
     protected boolean active = true; //If true, the entity is still on screen and should be ticked and rendered; if not, it's removed from the entity list and ignored

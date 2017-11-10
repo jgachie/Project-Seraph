@@ -8,12 +8,13 @@ package Graphics;
 import Entities.Entity;
 import Main.Handler;
 import Tiles.Tile;
+import java.io.Serializable;
 
 /**
  *
  * @author Soup
  */
-public class GameCamera {
+public class GameCamera implements Serializable{
     private Handler handler;
     private float xOffset, yOffset; //Offset variables; how far off from original position (relative to original camera angle) everything is drawn
     

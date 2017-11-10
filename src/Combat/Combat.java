@@ -11,6 +11,7 @@ import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Enums.StatusEffect;
 import Main.Handler;
 import UI.UITextBox;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,11 +20,11 @@ import java.util.Comparator;
  * Responsible for driving all combat logic in the game
  * @author Soup
  */
-public class Combat implements Runnable{
+public class Combat implements Runnable, Serializable{
     private static final int DELAY = 1500; //The length of the delay between displaying messages and taking turns
     
     private Handler handler; //The handler
-    private Thread thread; //Combat thread
+    private transient Thread thread; //Combat thread
     private PlayableActor turn; //The PlayableActor whose turn it is currently
     private boolean ready; //Whether the combat thread is ready to receive button input or not
     private int numTurns; //The number of turns that have passed so far
@@ -132,7 +133,7 @@ public class Combat implements Runnable{
             numTurns++;
             
             /*
-            Commented out for now; can't think of a reason to remove dead Actors from list of Actors (especially since Player still needs to see dead party member info)
+            Commented out for now; can't think of a reason to remove dead Actors from list of Actors (especially since player still needs to see dead party member info)
             
             //Iterate through the Player's party and remove all the dead member from the list of Actors and re-add those that were revived
             for (PlayableActor member : party){
@@ -156,9 +157,13 @@ public class Combat implements Runnable{
             
         }
         
-        //Run through Player's party and reload each member's original, unmodified stats
-        for (PlayableActor member : party)
+        UITextBox.resetBAOS(); //Reset the BAOS one last time
+        
+        //Run through Player's party and reload each member's original, unmodified stats; also, reset each member's fleeing flag to false
+        for (PlayableActor member : party){
             member.loadStats();
+            member.setFleeing(false);
+        }
         
         //If the Player won the battle, distribute each enemy's experience points to the entire party, and save the state of each member
         if (isPartyAlive() && !isEnemyAlive()){
@@ -251,7 +256,7 @@ public class Combat implements Runnable{
      * Determines whether or not the Player's entire party is dead
      * @return True if at least one party member is still alive, or false if they're all dead
      */
-    public boolean isPartyAlive(){
+    private boolean isPartyAlive(){
         //Iterate through Player's party to see if there are any party members still alive
         for (PlayableActor member : party){
             //If at least one party member is still alive, return true
@@ -266,7 +271,7 @@ public class Combat implements Runnable{
      * Determines whether or not the entire enemy party is dead
      * @return True if at least one party member is still alive, or false if they're all dead
      */
-    public boolean isEnemyAlive(){
+    private boolean isEnemyAlive(){
         //Iterate through enemy party to see if there are any party members still alive
         for (Enemy member : enemyParty){
             //If at least one party member is still alive, return true
@@ -305,11 +310,7 @@ public class Combat implements Runnable{
      * Ends the combat thread
      */
     public synchronized void stop(){
-        try{
-            handler.getGame().setState("Game");
-            thread.join();
-        } catch (InterruptedException ex){
-            ex.printStackTrace();
-        }
+        handler.getGame().setState("Game");
+        thread = null;
     }
 }

@@ -7,7 +7,6 @@ package Entities.Creatures.Actors;
 
 import Combat.Combat;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
-import Entities.Creatures.Actors.PlayableActors.Player;
 import Enums.StatusEffect;
 import Enums.DamageType;
 import Entities.Creatures.Creature;
@@ -118,11 +117,7 @@ public abstract class Actor extends Creature{
         System.out.println(name + " prepares to attack...\n");
         
         attacking = true;
-        //If/else statement is temporary; Player is the only Actor with an attack animation right now, so it'll be the only one that needs an animation delay
-        if (this instanceof Player)
-            handler.getCombat().animationDelay();
-        else
-            Combat.delay();
+        handler.getCombat().animationDelay();
         attacking = false;
         
         //If the attack misses, return; otherwise, calculate initial damage dealt and then apply defense modifiers
@@ -207,6 +202,8 @@ public abstract class Actor extends Creature{
         switch (type){
             case SLASH:
                 //I'll take care of this shit later
+                
+                //If the Actor is currently using Dragon Skin, apply recoil damage to the attacker
                 if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
                     DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
@@ -382,7 +379,15 @@ public abstract class Actor extends Creature{
      * @param restore The amount of hitpoints the Actor is to recover
      */
     public void heal(int restore){
+        //If the Actor has Dragon Skin active, output a message and return
+        if (tempEffects.containsKey(StatusEffect.DRAGON_SKIN)){
+            System.out.println(name + "'s Dragon Skin prevents restorative items/spells!");
+            return;
+        }
+        
         hitpoints += restore; //Heal the player by the set amount of hitpoints
+        
+        System.out.println(name + " recovered " + restore + " hitpoints!");
         
         //If the Actor's hitpoints exceed the Actor's maxHP, reset them to be equal
         if (hitpoints >= maxHP)
@@ -502,19 +507,19 @@ public abstract class Actor extends Creature{
         */
         
         if (agility < 25){
-            if (chance <= 40 - dexterity)
+            if (chance <= 40 - agility)
                 fleeing = false;
             else
                 fleeing = true;
         }
-        else if (25 <= dexterity && dexterity < 50){
-            if (agility <= 28 - (dexterity / 2))
+        else if (25 <= agility && agility < 50){
+            if (chance <= 28 - (agility / 2))
                 fleeing = false;
             else
                 fleeing = true;
         }
-        else if (dexterity >= 50){
-            if (agility <= 4)
+        else if (agility >= 50){
+            if (chance <= 4)
                 fleeing = false;
             else
                 fleeing = true;
@@ -537,7 +542,7 @@ public abstract class Actor extends Creature{
      */
     protected void save(Actor actor, Characters character){
         try{
-            fileOut = new FileOutputStream("ActorSaves/" + character.getValue());
+            fileOut = new FileOutputStream("SaveFiles/Actors/" + character.getValue());
             objectOut = new ObjectOutputStream(fileOut);
             objectOut.writeObject(actor);
             objectOut.close();
@@ -555,7 +560,7 @@ public abstract class Actor extends Creature{
      */
     protected static Actor load(String name){
         try{
-            fileIn = new FileInputStream("ActorSaves/" + name);
+            fileIn = new FileInputStream("SaveFiles/Actors/" + name);
             objectIn = new ObjectInputStream(fileIn);
             Actor actor = (Actor) objectIn.readObject();
             objectIn.close();

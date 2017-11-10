@@ -7,13 +7,11 @@ package States;
 
 import Combat.Combat;
 import Combat.Encounter;
-import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.PlayableActors.Player;
 import Main.Handler;
 import UI.UIManager;
 import Worlds.World;
 import java.awt.Graphics;
-import java.util.ArrayList;
 
 /**
  *
@@ -21,13 +19,11 @@ import java.util.ArrayList;
  */
 public class CombatState extends State{
     private World world; //The world
-    private UIManager uiManager; //The UI Manager
     private Player player; //The Player
     
     public CombatState(Handler handler){
         super(handler);
         player = Player.load(handler);
-        new Encounter(handler);
         Combat combat = new Combat(handler, player.getParty(), handler.getEncounter().getParty());
         world = new World(handler, "Resources/Worlds/World.txt", player.getParty(), handler.getEncounter().getParty(), combat);
         handler.setWorld(world); //Commented out for now; no need to fetch combat world from anywhere else, and it'll only get in the way of getting the main game world

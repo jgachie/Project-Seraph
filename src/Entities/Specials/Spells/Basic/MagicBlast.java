@@ -117,7 +117,7 @@ public class MagicBlast extends Spell{
             
             //Only do damage calculations if the Enemy is still alive
             if (mob.isAlive()){
-                damages[i] = mob.calcDamageReceived(damageBuffer, DamageType.MAGIC, StatusEffect.NONE); //Calculate damage after factoring in resistances
+                damages[i] = mob.calcDamageReceived(caster, damageBuffer, DamageType.MAGIC, StatusEffect.NONE); //Calculate damage after factoring in resistances
                 
                 //If the spell wasn't evaded or completely blocked, deal the damage to the Enemy; otherwise, do nothing
                 if (damages[i] > 0){

@@ -157,7 +157,7 @@ public class MagicBullet extends Spell{
         damage = calcDamage(caster);
         
         //Factor in enemy resistances
-        damage = target.calcDamageReceived(damage, DamageType.MAGIC, StatusEffect.NONE);
+        damage = target.calcDamageReceived(caster, damage, DamageType.MAGIC, StatusEffect.NONE);
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
         if (damage > 0){

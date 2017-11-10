@@ -5,11 +5,7 @@
 */
 package UI;
 
-import Entities.Creatures.Actors.Actor;
-import Entities.Creatures.Actors.Enemies.Enemy;
-import Entities.Creatures.Actors.PlayableActors.PlayableActor;
-import States.CombatState;
-import States.State;
+import Graphics.Assets;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -26,7 +22,7 @@ public class UITextBox extends UIObject{
     private static final PrintStream stream = new PrintStream(baos, true); //The new PrintStream that prints to the textbox
     private static final PrintStream oldStream = System.out; //The old PrintStream
     
-    private BufferedImage image; //The image of the text box itself
+    private static BufferedImage image = Assets.textBox; //The image of the text box itself
     
     public UITextBox(float x, float y, int width, int height, boolean visible, BufferedImage image) {
         super(x, y, width, height, visible);

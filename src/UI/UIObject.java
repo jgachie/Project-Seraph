@@ -8,12 +8,13 @@ package UI;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.io.Serializable;
 
 /**
  * Essentially the menu state version of Entity class; holds all buttons, sliders, etc. found on menu
  * @author Soup
  */
-public abstract class UIObject {
+public abstract class UIObject implements Serializable{
     protected float x, y; //Object coordinates
     protected int width, height; //Object width/height
     protected Rectangle bounds; //Bounding box for object
@@ -26,7 +27,8 @@ public abstract class UIObject {
         this.width = width;
         this.height = height;
         this.visible = visible;
-        bounds = new Rectangle((int) x, (int) y, width, height);
+        
+        bounds = new Rectangle((int) x, (int) y, width, height); //Set the bounding box for the object
     }
     
     public abstract void tick();

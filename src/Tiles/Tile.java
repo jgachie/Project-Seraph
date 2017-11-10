@@ -23,7 +23,7 @@ public class Tile {
     //Class
     public static final int TILE_WIDTH = 32, TILE_HEIGHT = 32; //Tile width/height
     
-    protected BufferedImage texture; //Image asset associated with the tile
+    protected transient BufferedImage texture; //Image asset associated with the tile
     protected final int ID; //ID number unique to each different tile
     
     public Tile(BufferedImage texture, int id){

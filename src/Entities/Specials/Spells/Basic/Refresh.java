@@ -119,7 +119,6 @@ public class Refresh extends Spell{
             restore *= 2;
         }
         
-        System.out.println(target.getName() + " recovered " + restore + " hitpoints!");
         target.heal(restore); //Heal the target
     }
 }

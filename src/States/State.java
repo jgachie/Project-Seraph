@@ -7,12 +7,13 @@ package States;
 
 import Main.Handler;
 import java.awt.Graphics;
+import java.io.Serializable;
 
 /**
  *
  * @author Soup
  */
-public abstract class State {
+public abstract class State implements Serializable{
     private static State currentState = null; //The state the game is currently running on
     
     /**
@@ -32,7 +33,7 @@ public abstract class State {
     }
     
     //Class
-    protected Handler handler; //The game itself
+    protected Handler handler; //The handler
     
     public State(Handler handler){
         this.handler = handler;

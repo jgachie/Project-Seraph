@@ -6,13 +6,14 @@
 package Display;
 
 import java.awt.*;
+import java.io.Serializable;
 import javax.swing.JFrame;
 
 /**
  *
  * @author Soup
  */
-public class Display {
+public class Display implements Serializable{
     private JFrame frame; //Window
     private Canvas canvas; //Canvas
     

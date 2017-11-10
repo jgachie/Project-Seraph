@@ -22,7 +22,7 @@ import java.util.Random;
 public class Goblin extends Enemy{
     private static Random dieRoll = new Random(); //A Radnom object for deciding outcomes
     
-    private static Animation fight;
+    private static Animation fight, attack;
     
     public Goblin(Handler handler, ArrayList<Enemy> enemyParty){
         super(handler, 0, 0, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, "Goblin", Weapon.bareHands,
@@ -36,6 +36,39 @@ public class Goblin extends Enemy{
         
         //Initialize animations
         fight = new Animation(200, false, Assets.goblinFightLeft);
+        attack = new Animation(150, true, Assets.goblinAttackLeft);
+    }
+    
+    @Override
+    public void tick() {
+        if (attacking){
+            if (!attack.isCompleted())
+                attack.tick();
+            else{
+                attack.setCompleted(false); //Reset attack animation before notifying the combat thread
+                synchronized(handler.getCombat()){
+                    handler.getCombat().notifyAll();
+                }
+            }
+        }
+        else
+            fight.tick();
+    }
+    
+    @Override
+    public void render(Graphics g) {
+        BufferedImage frame = getCurrentAnimationFrame();
+        g.drawImage(frame, (int) x - (frame.getWidth() * 2 - width), (int) y, frame.getWidth() * 2, frame.getHeight() * 2, null);
+    }
+    
+    @Override
+    protected BufferedImage getCurrentAnimationFrame(){
+        if (attacking){
+            if (!attack.isCompleted())
+                return attack.getCurrentFrame();
+        }
+        
+        return fight.getCurrentFrame();
     }
     
     @Override
@@ -45,20 +78,5 @@ public class Goblin extends Enemy{
         setAction(() -> {
             attack(party.get(target));
         });
-    }
-    
-    @Override
-    public void tick() {
-        fight.tick();
-    }
-    
-    @Override
-    public void render(Graphics g) {
-        BufferedImage frame = getCurrentAnimationFrame();
-        g.drawImage(frame, (int) (x), (int) (y), frame.getWidth() * 2, frame.getHeight() * 2, null);
-    }
-    
-    protected BufferedImage getCurrentAnimationFrame(){
-        return fight.getCurrentFrame();
     }
 }

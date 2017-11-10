@@ -11,15 +11,16 @@ import Graphics.GameCamera;
 import Input.KeyManager;
 import Input.MouseManager;
 import Worlds.World;
+import java.io.Serializable;
 
 /**
  *
  * @author Soup
  */
-public class Handler {
+public class Handler implements Serializable{
     private Game game; //The game itself
     private World world; //The world
-    private Combat combat; //The thread that combat is running on
+    private transient Combat combat; //The thread that combat is running on
     private Encounter encounter; //The next encounter
     
     public Handler(Game game){

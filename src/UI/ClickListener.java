@@ -5,12 +5,14 @@
 */
 package UI;
 
+import java.io.Serializable;
+
 
 /**
  *
  * @author Soup
  */
-public interface ClickListener {
+public interface ClickListener extends Serializable{
     
     public void onClick();
 }

@@ -8,7 +8,6 @@ package Items.Equipment;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Items.Item;
 import Enums.Characters;
-import Main.Handler;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -18,12 +17,12 @@ import java.util.ArrayList;
  */
 public abstract class Equipment extends Item{
     protected final ArrayList<Characters> USERS; //An ArrayList of the characters capable of using this grimoire
-    protected final int[] STATREQS; //The stat requirements for equipping this weapon; order of stats is Strength, Dexterity, Wisdom, Intelligence, Luck, Defense, Evasion, Skill
+    protected final int[] STAT_REQS; //The stat requirements for equipping this weapon; order of stats is Strength, Dexterity, Wisdom, Intelligence, Luck, Defense, Evasion, Skill
     
     
     public Equipment(BufferedImage texture, String name, String ID, int[] statReqs, ArrayList<Characters> users) {
         super(texture, name, ID);
-        this.STATREQS = statReqs;
+        this.STAT_REQS = statReqs;
         this.USERS = users;
     }
     
@@ -41,9 +40,9 @@ public abstract class Equipment extends Item{
      */
     protected boolean checkStats(int[] stats){
         //Iterate over both arrays simultaneously to compare Actor's stats to the equipment's stat requirements
-        for (int i = 0; i < STATREQS.length; i++){
+        for (int i = 0; i < STAT_REQS.length; i++){
             //If any one of the Actor's stats is less than the corresponding stat requirement, return false
-            if (STATREQS[i] > stats[i])
+            if (STAT_REQS[i] > stats[i])
                 return false;
         }
         

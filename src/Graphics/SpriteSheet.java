@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
  * @author Soup
  */
 public class SpriteSheet {
-    private BufferedImage sheet; //BufferedImage of spritesheet
+    private transient BufferedImage sheet; //BufferedImage of spritesheet
     
     public SpriteSheet(BufferedImage sheet){
         this.sheet = sheet;

@@ -9,6 +9,7 @@ import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.Enemies.Goblin;
 import Main.Handler;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -20,7 +21,7 @@ import java.util.Random;
  * fights.
  * @author Soup
  */
-public class Encounter {
+public class Encounter implements Serializable{
     private static Random dieRoll = new Random(); //A Random object for determining various outcomes
     
     private Handler handler; //The handler
@@ -30,7 +31,7 @@ public class Encounter {
     public Encounter(Handler handler){
         this.handler = handler;
         this.enemyParty = new ArrayList<Enemy>();
-        this.steps = dieRoll.nextInt(26) + 5; //Set the number of steps until the encounter is triggered (anywhere between 5 and 30)
+        this.steps = dieRoll.nextInt(41) + 10; //Set the number of steps until the encounter is triggered (anywhere between 10 and 40)
         
         enemyParty.add(new Goblin(handler, enemyParty));
         //enemyParty.add(new Goblin(handler, enemyParty));

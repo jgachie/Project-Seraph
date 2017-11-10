@@ -131,7 +131,7 @@ public class ShadowStrike extends Skill{
         }
         
         //Factor in enemy resistances
-        damage = target.calcDamageReceived(damage, user.getWeapon().getType(), StatusEffect.NONE);
+        damage = target.calcDamageReceived(user, damage, user.getWeapon().getType(), StatusEffect.NONE);
         
         //If the attack wasn't evaded or completely blocked, deal the damage to the target
         if (damage > 0){

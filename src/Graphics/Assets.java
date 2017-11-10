@@ -16,18 +16,19 @@ public class Assets {
     private static final int T_WIDTH = 32, T_HEIGHT = 32; //Tile default width/height
     
     //Image assets
-    public static BufferedImage player, goblin, grass, water, stone, dirt, tree, btn, textBox, magicBullet;
+    public transient static BufferedImage player, goblin, grass, water, stone, dirt, tree, btn, textBox, pauseScreen, pointer, magicBullet;
     
     //Animation assets
-    public static BufferedImage[] playerDown, playerUp, playerRight, playerLeft;
-    public static BufferedImage[] playerRunDown, playerRunUp, playerRunRight, playerRunLeft;
-    public static BufferedImage[] playerFightDown, playerFightUp, playerFightLeft, playerFightRight;
-    public static BufferedImage[] playerAttackRight, playerAttackLeft;
-    public static BufferedImage[] playerCastRight, playerCastLeft;
-    public static BufferedImage[] goblinDown, goblinUp, goblinRight, goblinLeft;
-    public static BufferedImage[] goblinFightDown, goblinFightUp, goblinFightLeft, goblinFightRight;
-    public static BufferedImage[] bulletForming, bulletExploding;
-    public static BufferedImage[] refresh;
+    public transient static BufferedImage[] playerDown, playerUp, playerRight, playerLeft;
+    public transient static BufferedImage[] playerRunDown, playerRunUp, playerRunRight, playerRunLeft;
+    public transient static BufferedImage[] playerFightDown, playerFightUp, playerFightLeft, playerFightRight;
+    public transient static BufferedImage[] playerAttackRight, playerAttackLeft;
+    public transient static BufferedImage[] playerCastRight, playerCastLeft;
+    public transient static BufferedImage[] goblinDown, goblinUp, goblinRight, goblinLeft;
+    public transient static BufferedImage[] goblinFightDown, goblinFightUp, goblinFightLeft, goblinFightRight;
+    public transient static BufferedImage[] goblinAttackRight, goblinAttackLeft;
+    public transient static BufferedImage[] bulletForming, bulletExploding;
+    public transient static BufferedImage[] refresh;
     
     /**
      * Initialize all assets
@@ -49,6 +50,8 @@ public class Assets {
         tree = miscSheet.crop(T_WIDTH * 5, 0, T_WIDTH, T_HEIGHT * 2);
         btn = miscSheet.crop(192, 0, T_WIDTH * 4, T_HEIGHT * 2);
         textBox = miscSheet.crop(0, 64, 1024, 300);
+        pauseScreen = miscSheet.crop(0, 364, 1024, 768);
+        pointer = miscSheet.crop(320, 0, 38, 18);
         magicBullet = effectSheet.crop(84, 37, 16, 16);
         
         //Initialize animations
@@ -76,6 +79,9 @@ public class Assets {
         goblinFightUp = new BufferedImage[2];
         goblinFightRight = new BufferedImage[2];
         goblinFightLeft = new BufferedImage[2];
+        
+        goblinAttackRight = new BufferedImage[5];
+        goblinAttackLeft = new BufferedImage[5];
         
         bulletForming = new BufferedImage[4];
         bulletExploding = new BufferedImage[5];
@@ -164,6 +170,12 @@ public class Assets {
         
         goblinFightLeft[0] = goblinSheet.cropCreature(3, 5);
         goblinFightLeft[1] = goblinSheet.cropCreature(3, 6);
+        
+        goblinAttackLeft[0] = goblinSheet.cropCreature(4, 0);
+        goblinAttackLeft[1] = goblinSheet.crop(24, 116, 21, C_HEIGHT);
+        goblinAttackLeft[2] = goblinSheet.crop(49, 116, 26, C_HEIGHT);
+        goblinAttackLeft[3] = goblinSheet.crop(79, 116, 31, C_HEIGHT);
+        goblinAttackLeft[4] = goblinSheet.crop(114, 116, 31, C_HEIGHT);
         
         //Magic Bullet
         bulletForming[0] = effectSheet.crop(4, 37, 16, 16);

@@ -6,7 +6,6 @@
 package Entities.Creatures.Actors.PlayableActors;
 
 import Entities.Creatures.Actors.Actor;
-import Entities.EntityManager;
 import Items.Equipment.Weapon;
 import Items.Grimoires.Grimoire;
 import Items.Tomes.Tome;
