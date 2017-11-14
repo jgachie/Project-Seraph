@@ -71,7 +71,7 @@ public class TaintedEdge extends Skill{
             
             //If the user misses and lands a critical, they'll be poisoned
             if (skillCrit(user)){
-                user.addEffect(StatusEffect.POISON);
+                user.addEffect(StatusEffect.POISON, StatusEffect.PERSISTENT);
                 System.out.println(user.getName() + " was poisoned!");
             }
             

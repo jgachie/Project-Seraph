@@ -9,6 +9,7 @@ import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Specials.Spells.Spell;
+import Enums.Stat;
 import Main.Handler;
 import UI.UITextBox;
 import java.awt.Graphics;
@@ -70,11 +71,11 @@ public class Enrage extends Spell{
         
         System.out.println("...The spell succeeded!");
         
-        System.out.println(ally.getName() + "'s strength increased by 2, and their dexterity and intelligence"
-                + "fell by 2!");
+        ally.modifyStat(Stat.STRENGTH, 2); //Increase strength by 2
+        ally.modifyStat(Stat.DEXTERITY, -2); //Decrease dexterity by 2
+        ally.modifyStat(Stat.INTELLIGENCE, -2); //Decrease intelligence by 2
         
-        ally.modifyStat("Strength", 2); //Increase strength by 2
-        ally.modifyStat("Dexterity", -2); //Decrease dexterity by 2
-        ally.modifyStat("Intelligence", -2); //Decrease intelligence by 2
+        System.out.println(ally.getName() + "'s Strength increased by 2, and their Dexterity and Intelligence"
+                + "fell by 2!");
     }
 }

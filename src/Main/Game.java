@@ -9,6 +9,7 @@ import Combat.Encounter;
 import Display.Display;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Creatures.Actors.PlayableActors.Player;
+import Enums.States;
 import Graphics.Assets;
 import Graphics.GameCamera;
 import Input.KeyManager;
@@ -208,36 +209,36 @@ public class Game implements Runnable, Serializable{
     
     //GETTERS/SETTERS
     
-    public State getState(String state){
-        switch (state.toUpperCase()){
-            case "MENU":
+    public State getState(States state){
+        switch (state){
+            case MENU:
                 return menuState;
-            case "GAME":
+            case GAME:
                 return gameState;
-            case "PAUSE":
+            case PAUSE:
                 return pauseState;
             default:
                 throw new InputMismatchException(); //If you get here, you fucked up when trying to get the state
         }
     }
     
-    public void setState(String state){
-        switch (state.toUpperCase()){
-            case "MENU":
+    public void setState(States state){
+        switch (state){
+            case MENU:
                 handler.getMouseManager().setUIManager(menuState.getUIManager()); //Set the mouse manager's UI manager to the menu state's UI manager so it has control over the mouse
                 State.setState(menuState);
                 break;
-            case "GAME":
+            case GAME:
                 if (handler.getWorld() != null){
                     handler.getWorld().getEntityManager().setPlayer(Player.load(handler));
                 }
                 State.setState(gameState);
                 break;
-            case "PAUSE":
+            case PAUSE:
                 handler.getMouseManager().setUIManager(pauseState.getUIManager()); //Set the mouse manager's UI manager to the pause state's UI manager it has control over the mouse
                 State.setState(pauseState);
                 break;
-            case "COMBAT":
+            case COMBAT:
                 for (PlayableActor member : handler.getWorld().getEntityManager().getPlayer().getParty())
                     member.save();
                 State.setState(new CombatState(handler));

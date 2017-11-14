@@ -7,6 +7,7 @@ package Entities.Creatures.Actors.Enemies;
 
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
+import Enums.Stat;
 import Items.Equipment.Weapon;
 import Main.Handler;
 import java.util.ArrayList;
@@ -29,27 +30,27 @@ public abstract class Enemy extends Actor{
     public abstract void decide(ArrayList<PlayableActor> party);
     
     @Override
-    public void modifyStat(String stat, int modify){
-        switch (stat.toUpperCase()){
-            case "STRENGTH":
+    public void modifyStat(Stat stat, int modify){
+        switch (stat){
+            case STRENGTH:
                 strength += modify;
                 break;
-            case "DEXTERITY":
+            case DEXTERITY:
                 dexterity += modify;
                 break;
-            case "WISDOM":
+            case WISDOM:
                 wisdom += modify;
                 break;
-            case "INTELLIGENCE":
+            case INTELLIGENCE:
                 intelligence += modify;
                 break;
-            case "LUCK":
+            case LUCK:
                 luck += modify;
                 break;
-            case "DEFENSE":
+            case DEFENSE:
                 defense += modify;
                 break;
-            case "AGILITY":
+            case AGILITY:
                 agility += modify;
                 break;
             default:

@@ -26,7 +26,7 @@ public class Goblin extends Enemy{
     
     public Goblin(Handler handler, ArrayList<Enemy> enemyParty){
         super(handler, 0, 0, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, "Goblin", Weapon.bareHands,
-                1, 100, 0, 50, 5, 5, 5, 5, 5, 5, 5, enemyParty);
+                1, 100, 0, 100, 5, 5, 5, 5, 5, 5, 5, enemyParty);
         
         //Set bounding box coordinates (relative to top-left corner of entity) and width/height
         bounds.x = 8;

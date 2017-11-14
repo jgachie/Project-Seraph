@@ -15,13 +15,24 @@ import java.io.Serializable;
  */
 public abstract class State implements Serializable{
     private static State currentState = null; //The state the game is currently running on
+    private static State previousState = null; //The state the game was previously running on
     
     /**
      * Sets the current state
      * @param state The state to be set to current
      */
     public static void setState(State state){
+        previousState = currentState;
         currentState = state;
+    }
+    
+    /**
+     * Sets the current state to the previous state, and the previous state to the (former) current state
+     */
+    public static void restoreState(){
+        State tempState = currentState;
+        currentState = previousState;
+        previousState = tempState;
     }
     
     /**
@@ -30,6 +41,14 @@ public abstract class State implements Serializable{
      */
     public static State getState(){
         return currentState;
+    }
+    
+    /**
+     * Returns the previous state
+     * @return The previous state
+     */
+    public static State getPrevoiusState(){
+        return previousState;
     }
     
     //Class

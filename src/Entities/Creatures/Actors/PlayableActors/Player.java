@@ -7,6 +7,7 @@ package Entities.Creatures.Actors.PlayableActors;
 
 import Entities.Creatures.Actors.Actor;
 import Enums.Characters;
+import Enums.States;
 import Graphics.Animation;
 import Graphics.Assets;
 import Inventory.Inventory;
@@ -36,7 +37,7 @@ public class Player extends PlayableActor{
     
     public Player(Handler handler, float x, float y, String name){
         super(handler, x, y, DEFAULT_CREATURE_WIDTH, DEFAULT_CREATURE_HEIGHT, name, Characters.SARIEL,
-                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 5, 99, 5, 5, 5, 5, new ArrayList<PlayableActor>());
+                Weapon.broadsword, 1, 100, 100, 100, 0, 5, 5, 99, 99, 5, 5, 5, 5, new ArrayList<PlayableActor>());
         
         //Set bounding box coordinates (relative to top-left corner of Player entity) and width/height
         bounds.x = 8;
@@ -57,6 +58,7 @@ public class Player extends PlayableActor{
         //Initialize other shit
         inv = new Inventory(handler);
         inv.addItem(new Potion());
+        inv.addItem(Weapon.broadsword);
         party.add(this); //Add the player to the party
     }
     
@@ -134,7 +136,7 @@ public class Player extends PlayableActor{
         //If enough steps have been taken, trigger the encounter and initiate combat
         if (steps >= handler.getEncounter().getSteps()){
             steps = 0; //Reset the number of steps
-            handler.getGame().setState("Combat"); //Start combat
+            handler.getGame().setState(States.COMBAT); //Start combat
             handler.setEncounter(null); //After combat finishes, reset the encounter
         }
         
@@ -168,7 +170,7 @@ public class Player extends PlayableActor{
         if (handler.getKeyManager().right)
             xMove = speed;
         if (handler.getKeyManager().keyJustPressed(KeyEvent.VK_ENTER))
-            handler.getGame().setState("Pause");
+            handler.getGame().setState(States.PAUSE);
     }
     
     @Override

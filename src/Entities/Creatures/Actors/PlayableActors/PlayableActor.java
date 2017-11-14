@@ -1,10 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Entities.Creatures.Actors.PlayableActors;
 
+import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
 import Items.Equipment.Weapon;
 import Items.Grimoires.Grimoire;
@@ -12,6 +13,10 @@ import Items.Tomes.Tome;
 import Main.Handler;
 import Enums.Stance;
 import Enums.Characters;
+import Enums.Stat;
+import Enums.States;
+import States.PauseState;
+import UI.UITextBox;
 import java.util.ArrayList;
 
 /**
@@ -31,7 +36,7 @@ public abstract class PlayableActor extends Actor{
     
     //TEMPORARY COMBAT FIELDS
     protected boolean casting = false;
-            
+    
     private int[] statSave; //An array holding the Actor's original, unmodified stats before entering combat
     
     protected PlayableActor(Handler handler, float x, float y, int width, int height, String name, Characters character,
@@ -58,21 +63,107 @@ public abstract class PlayableActor extends Actor{
     /**
      * Accumulates gained experience points into total experience points, and calls levelUp method if
      * the experience cap is reached
-     * @param exp The amount of experience points gained
+     * @param experience The amount of experience points gained
      */
-    public void gainExp(int exp){
-        this.exp += exp; //Add the experience points to the total
+    public void gainExp(int experience){
+        exp += experience; //Add the experience points to the total
         
-        //If the Actor has gained enough experience points, increase their level
-        if (exp >= expCap)
-            levelUp();
+        //If the Actor has gained enough experience points, switch over to the level screen in the Pause state so they can level up
+        //This is a while loop to account for the off chance that the Actor gained enough experience to level up more than once
+        while (exp >= expCap){
+            UITextBox.resetBAOS();
+            System.out.println(name + " leveled up!");
+            Combat.delay();
+            PauseState pauseState = (PauseState) handler.getGame().getState(States.PAUSE); //Get the game's pause state
+            pauseState.setSubmenu("Level Up"); //Set the pause state up to load the "level up" menu
+            pauseState.setActor(this); //Set the actor being leveled up
+            pauseState.setMenuSwitch(true); //Set the pause state's menu switch flag to true
+            handler.getGame().setState(States.PAUSE); //Switch over to the pause state
+            
+            //Make the thread wait until the Actor is done leveling up
+            synchronized (this){
+                try{
+                    this.wait();
+                } catch (InterruptedException ex){
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
     
     /**
-     * Increases the Actor's level, and allows the Player to choose a stat to level up
+     * Increases the Actor's level, and allows the player to choose a stat to level up
+     * @param stat The stat to be leveled up
      */
-    private void levelUp(){
-        //I'll do this shit later
+    public void levelUp(Stat stat){
+        level++; //Increase the Actor's level by one
+        exp -= expCap; //Subtract the cap from the Actor's experience points and set "exp" to whatever remains
+        expCap *= (1.5 + ((level - 1) * .1)); //The cap increases with each level by a factor of 1.5 + .1 * whatever level the character is now
+        
+        //Level up the chosen stat
+        switch(stat){
+            case STRENGTH:
+                strength++;
+                break;
+            case DEXTERITY:
+                dexterity++;
+                break;
+            case WISDOM:
+                wisdom++;
+                maxMP += 10; //Increasing Wisdom also increases max MP
+                break;
+            case INTELLIGENCE:
+                intelligence++;
+                
+                //Increasing Intelligence also increases magic defenses
+                magicDef += 10;
+                fireDef += 10;
+                iceDef += 10;
+                earthDef += 10;
+                lightningDef += 10;
+                break;
+            case LUCK:
+                luck++;
+                break;
+            case DEFENSE:
+                defense++;
+                
+                //Increasing Defense also increases max HP and physical defenses
+                maxHP += 10;
+                slashDef += 10;
+                stabDef += 10;
+                crushDef += 10;
+                pierceDef += 10;
+                break;
+            case AGILITY:
+                agility++;
+                
+                //Increasing Agility also increases stats resistances
+                poisonRes += 10;
+                stunRes += 10;
+                freezeRes += 10;
+                break;
+            case SKILL:
+                skill++;
+                
+                //Increasing Skill also increases max SP and chaos defenses
+                maxSP += 10;
+                chaosDef += 10;
+                break;
+            default:
+                //Shouldn't ever get here; if you do, FUCKING PANIC
+                break;
+        }
+        
+        //Restore hitpoints, mana, and skillpoints to new maximums
+        hitpoints = maxHP;
+        mana = maxMP;
+        skillpoints = maxSP;
+        
+        //Give the original thread the go-ahead to continue
+        synchronized (this){
+            notifyAll();
+        }
     }
     
     //COMBAT METHODS
@@ -93,7 +184,7 @@ public abstract class PlayableActor extends Actor{
      * skills and calls it use method
      * @param target The Actor being targeted
      * @param skillNum The ordinal number of the skill being used (should be between 1 and 5)
-     * @param Handler The handler
+     * @param handler The handler
      */
     public void useSkill(Actor target, int skillNum, Handler handler){
         tome.getSkills().get(skillNum).use(this, target, handler);
@@ -116,30 +207,30 @@ public abstract class PlayableActor extends Actor{
     }
     
     @Override
-    public void modifyStat(String stat, int modify){
-        switch (stat.toUpperCase()){
-            case "STRENGTH":
+    public void modifyStat(Stat stat, int modify){
+        switch (stat){
+            case STRENGTH:
                 strength += modify;
                 break;
-            case "DEXTERITY":
+            case DEXTERITY:
                 dexterity += modify;
                 break;
-            case "WISDOM":
+            case WISDOM:
                 wisdom += modify;
                 break;
-            case "INTELLIGENCE":
+            case INTELLIGENCE:
                 intelligence += modify;
                 break;
-            case "LUCK":
+            case LUCK:
                 luck += modify;
                 break;
-            case "DEFENSE":
+            case DEFENSE:
                 defense += modify;
                 break;
-            case "AGILITY":
+            case AGILITY:
                 agility += modify;
                 break;
-            case "SKILL":
+            case SKILL:
                 skill += modify;
                 break;
             default:
@@ -216,19 +307,19 @@ public abstract class PlayableActor extends Actor{
     public void setExpCap(int expCap) {
         this.expCap = expCap;
     }
-
+    
     public int getSkillpoints() {
         return skillpoints;
     }
-
+    
     public void setSkillpoints(int skillpoints) {
         this.skillpoints = skillpoints;
     }
-
+    
     public int getMaxSP() {
         return maxSP;
     }
-
+    
     public void setMaxSP(int maxSP) {
         this.maxSP = maxSP;
     }
@@ -256,11 +347,11 @@ public abstract class PlayableActor extends Actor{
     public void setTome(Tome tome) {
         this.tome = tome;
     }
-
+    
     public ArrayList<PlayableActor> getParty() {
         return party;
     }
-
+    
     public void setParty(ArrayList<PlayableActor> party) {
         this.party = party;
     }

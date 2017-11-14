@@ -12,12 +12,12 @@ import Enums.DamageType;
 import Entities.Creatures.Creature;
 import Entities.Specials.Skills.Basic.DragonSkin;
 import Enums.Characters;
+import Enums.Stat;
 import Items.Equipment.Weapon;
 import Main.Handler;
 import UI.UITextBox;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
@@ -45,31 +45,29 @@ public abstract class Actor extends Creature{
     protected int maxHP; //Actor's max HP
     protected int mana; //How much mana the Actor has left
     protected int maxMP; //Actor's max MP
-    protected int exp = 0; //How much experience the Actor currently has
+    protected int exp; //How much experience the Actor currently has
     protected int strength; //Actor's strength stat; determines power of physical attacks
     protected int dexterity; //Actor's dexterity stat; determines accuracy of physical attacks and resistance stats
     protected int wisdom; //Actor's wisdom stat; determines power of magical attacks and max MP
     protected int intelligence; //Actor's intelligence stat; determines efficacy of support magic and magical defense stats
     protected int luck; //Actor's luck stat; determines item/gold drops and all critical hit rates
     protected int defense; //Actor's defense stat; determines physical defense stats and max HP
-    protected int agility; //Actor's agility stat; determines evasion/flee success rate and attack order
-    protected int slashDef; //Actor's slash defense stat; determines damage absorbed from slash attacks
-    protected int stabDef; //Actor's stab defense stat; determines damage absorbed from stab attacks
-    protected int crushDef; //Actor's crush defense stat; determines damage absorbed from crush attacks
-    protected int pierceDef; //Actor's pierce defense stat; determines damage absorbed from pierce attacks (mostly ranged attacks)
-    protected int magicDef; //Actor's magic defense stat; determines damage absorbed from non-elemental magic attacks
-    protected int chaosDef; //Actor's chaos defense stat; determines damage absorbed from chaos attacks
-    protected int fireDef; //Actor's fire defense stat; determines damage absorbed from fire attacks
-    protected int iceDef; //Actor's water defense stat; determines damage absorbed from water attacks
-    protected int earthDef; //Actor's earth defense stat; determines damage absorbed from earth attacks
-    protected int lightningDef; //Actor's lightning defense stat; determines damage absorbed from lightning attacks
-    protected int poisonRes; //Actor's resistance to poison/toxic; determines chance of being poisoned/toxined (max of 500)
-    protected int stunRes; //Actor's resistance to stun; determines chance of being stunned (max of 500)
-    protected int freezeRes; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
-    protected ArrayList<StatusEffect> status; //An ArrayList of the status effects the Actor is currently afflicted by
+    protected int agility; //Actor's agility stat; determines flee success rate, attack order, and status resistances
+    protected int slashDef = 50; //Actor's slash defense stat; determines damage absorbed from slash attacks
+    protected int stabDef = 50; //Actor's stab defense stat; determines damage absorbed from stab attacks
+    protected int crushDef = 50; //Actor's crush defense stat; determines damage absorbed from crush attacks
+    protected int pierceDef = 50; //Actor's pierce defense stat; determines damage absorbed from pierce attacks (mostly ranged attacks)
+    protected int magicDef = 50; //Actor's magic defense stat; determines damage absorbed from non-elemental magic attacks
+    protected int chaosDef = 50; //Actor's chaos defense stat; determines damage absorbed from chaos attacks
+    protected int fireDef = 50; //Actor's fire defense stat; determines damage absorbed from fire attacks
+    protected int iceDef = 50; //Actor's water defense stat; determines damage absorbed from water attacks
+    protected int earthDef = 50; //Actor's earth defense stat; determines damage absorbed from earth attacks
+    protected int lightningDef = 50; //Actor's lightning defense stat; determines damage absorbed from lightning attacks
+    protected int poisonRes = 50; //Actor's resistance to poison/toxic; determines chance of being poisoned/toxined (max of 500)
+    protected int stunRes = 50; //Actor's resistance to stun; determines chance of being stunned (max of 500)
+    protected int freezeRes = 50; //Actor's resistance to freeze; determines chance of being frozen (max of 500)
     protected transient Runnable action; //A set of combat methods set during the takeTurn phase of combat and run during the action phase
-    protected HashMap<StatusEffect, Integer> tempEffects; //A hashmap to hold the durations of certain status effects during combat; each key is a StatusEffect describing the effect
-    //that must be held, and the corresponding value is the turn on which the effect expires
+    protected HashMap<StatusEffect, Integer> effects; //A hashmap to hold the Actor's inflicted status effects the duration for which they last in terms of turns
     protected boolean alive = true; //Whether or not the Actor is alive
     
     //TEMPORARY COMBAT FIELDS
@@ -98,11 +96,7 @@ public abstract class Actor extends Creature{
         this.agility = agility;
         
         //Standard initializations
-        poisonRes = 50;
-        stunRes = 50;
-        freezeRes = 50;
-        status = new ArrayList<StatusEffect>();
-        tempEffects = new HashMap<StatusEffect, Integer>();
+        effects = new HashMap<StatusEffect, Integer>();
     }
     
     //COMBAT METHODS
@@ -196,44 +190,70 @@ public abstract class Actor extends Creature{
     public int calcDamageReceived(Actor attacker, int damage, DamageType type, StatusEffect effect){
         /*
         Defense doesn't affect damage reduction directly; increasing defense increases damage type defenses
-        (in addition to max hp), which in takeTurn are used in damage reduction calculations
+        (in addition to max HP), which in turn are used in damage reduction calculations.
+        
+        Each defense type starts at 50 and has a maximum value of 1000, at which point 100% of that
+        type of damage is blocked. Damage calculations are done as follows: damage *= (1 - ([defense_type] / 1000)).
         */
+        
+        double damageBuffer = 0;
         
         switch (type){
             case SLASH:
-                //I'll take care of this shit later
+                damageBuffer = 1 - (slashDef * .001);
                 
                 //If the Actor is currently using Dragon Skin, apply recoil damage to the attacker
-                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                if (effects.containsKey(StatusEffect.DRAGON_SKIN) && attacker != null)
                     DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case STAB:
-                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                damageBuffer = 1 - (stabDef * .001);
+                
+                if (effects.containsKey(StatusEffect.DRAGON_SKIN) && attacker != null)
                     DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case CRUSH:
-                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                damageBuffer = 1 - (crushDef * .001);
+                
+                if (effects.containsKey(StatusEffect.DRAGON_SKIN) && attacker != null)
                     DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case PIERCE:
-                if (tempEffects.get(StatusEffect.DRAGON_SKIN) != null && attacker != null)
+                damageBuffer = 1 - (pierceDef * .001);
+                
+                if (effects.containsKey(StatusEffect.DRAGON_SKIN) && attacker != null)
                     DragonSkin.dragonDamage((PlayableActor) this, attacker);
                 break;
             case MAGIC:
+                damageBuffer = 1 - (magicDef * .001);
+                
                 break;
             case CHAOS:
+                damageBuffer = 1 - (chaosDef * .001);
+                
                 break;
             case FIRE:
+                damageBuffer = 1 - (fireDef * .001);
+                
                 break;
             case ICE:
+                damageBuffer = 1 - (iceDef * .001);
+                
                 break;
             case EARTH:
+                damageBuffer = 1 - (earthDef * .001);
+                
                 break;
             case LIGHTNING:
+                damageBuffer = 1 - (lightningDef * .001);
+                
                 break;
             default:
                 //Shouldn't ever get here; if you do, FUCKING PANIC
+                break;
         }
+        
+        damage *= damageBuffer;
         
         //If there is an applicable status effect, run it against Actor's resistances and apply it
         if (effect != StatusEffect.NONE)
@@ -319,40 +339,44 @@ public abstract class Actor extends Creature{
      * @param effect The status effect
      */
     private void statusHit(StatusEffect effect){
-        int chance = dieRoll.nextInt(500); //Roll for effect chance
+        int chance = dieRoll.nextInt(1000); //Roll for effect chance
         
         switch(effect){
             case POISON:
                 //If the Actor is already poisoned, do nothing and return
-                if (status.contains(StatusEffect.POISON))
+                if (effects.containsKey(StatusEffect.POISON))
                     return;
                 
                 if (chance <= 500 - poisonRes)
-                    status.add(effect);
+                    effects.put(effect, StatusEffect.PERSISTENT);
+                System.out.println(name + " has been poisoned!");
                 break;
             case TOXIC:
                 //If the Actor is already toxined, do nothing and return
-                if (status.contains(StatusEffect.TOXIC))
+                if (effects.containsKey(StatusEffect.TOXIC))
                     return;
                 
                 if (chance <= 500 - poisonRes)
-                    status.add(effect);
+                    effects.put(effect, StatusEffect.PERSISTENT);
+                System.out.println(name + " has been toxined!");
                 break;
             case STUN:
                 //If the Actor is already stunned, do nothing and return
-                if (status.contains(StatusEffect.STUN))
+                if (effects.containsKey(StatusEffect.STUN))
                     return;
                 
                 if (chance <= 500 - stunRes)
-                    status.add(effect);
+                    effects.put(effect, StatusEffect.PERSISTENT);
+                System.out.println(name + " has been stunned!");
                 break;
             case FREEZE:
                 //If the Actor is already frozen, do nothing and return
-                if (status.contains(StatusEffect.FREEZE))
+                if (effects.containsKey(StatusEffect.FREEZE))
                     return;
                 
                 if (chance <= 500 - freezeRes)
-                    status.add(effect);
+                    effects.put(effect, StatusEffect.PERSISTENT);
+                System.out.println(name + " has been frozen!");
                 break;
             default:
                 //Shouldn't ever get here; if you do, FUCKING PANIC
@@ -380,7 +404,7 @@ public abstract class Actor extends Creature{
      */
     public void heal(int restore){
         //If the Actor has Dragon Skin active, output a message and return
-        if (tempEffects.containsKey(StatusEffect.DRAGON_SKIN)){
+        if (effects.containsKey(StatusEffect.DRAGON_SKIN)){
             System.out.println(name + "'s Dragon Skin prevents restorative items/spells!");
             return;
         }
@@ -409,11 +433,13 @@ public abstract class Actor extends Creature{
     /**
      * Inflicts the Actor with a given status effect
      * @param effect The status effect to be inflicted
+     * @param expires The number of turns after which the effect expires
+     * @expires
      */
-    public void addEffect(StatusEffect effect){
+    public void addEffect(StatusEffect effect, int expires){
         //If the Actor isn't already afflicted by the status effect, apply it; otherwise, do nothing
-        if (!status.contains(effect))
-            status.add(effect);
+        if (!effects.containsKey(effect))
+            effects.put(effect, expires);
     }
     
     /**
@@ -422,52 +448,21 @@ public abstract class Actor extends Creature{
      */
     public void removeEffect(StatusEffect effect){
         //Only remove the effect if the Actor is currently afflicted with it; if not, do nothing
-        if (status.contains(effect))
-            status.remove(effect);
-    }
-    
-    /**
-     * Inflicts the Actor with a temporary status effect
-     * @param effect The status effect to be inflicted
-     * @param expires The amount of turns after which the effect expires
-     */
-    public void addTempEffect(StatusEffect effect, int expires){
-        //If the effect is already in the HashMap (returns a non-null value), do nothing and return
-        if (tempEffects.get(effect) != null)
-            return;
-        
-        tempEffects.put(effect, handler.getCombat().getNumTurns() + expires); //Add the effect to the HashMap
-        addEffect(effect); //Apply the effect to the Actor
-    }
-    
-    /**
-     * Removes a temporary status effect from the Actor
-     * @param effect The status effect to be removed
-     */
-    public void removeTempEffect(StatusEffect effect){
-        //If the effect isn't already in the HashMap (returns a null value), do nothing and return
-        if (tempEffects.get(effect) == null)
-            return;
-        
-        UITextBox.resetBAOS();
-        System.out.println(name + "'s " + effect.getValue() + " wore off!");
-        
-        //If the effect modifies Actor stats, iterate through the list of modified stats and revert them to normal
-        if (effect.getStats().length > 0){
+        if (effects.containsKey(effect)){
+            effects.remove(effect);
+            
+            //If the effect modifies Actor stats, iterate through the list of modified stats and revert them to normal
             for (int i = 0; i < effect.getStats().length; i++)
-                modifyStat(effect.getStats()[i], -effect.getModifiers()[i]);
+                modifyStat(effect.getStats()[i], effect.getModifiers()[i]);
         }
-        
-        tempEffects.remove(effect); //Remove the effect from the HashMap
-        removeEffect(effect); //Remove the effect from the Actor
     }
     
     /**
-     * Updates the Actor's temporary status effects, and removes effects that have expired
+     * Updates the Actor's temporary status effects, having each one take effect and removing the ones that have expired
      * @param turn The number of the current turn
      */
     public void updateStatus(int turn){
-        Iterator it = tempEffects.entrySet().iterator(); //Create an Iterator for running through the HashMap
+        Iterator it = effects.entrySet().iterator(); //Create an Iterator for running through the HashMap
         
         //Run through the HashMap of status effects
         while (it.hasNext()){
@@ -475,9 +470,11 @@ public abstract class Actor extends Creature{
             StatusEffect effect = (StatusEffect) entry.getKey(); //Store the status effect in question
             int expires = (int) entry.getValue(); //Store the turn on which the effect expires
             
-            //If the current turn is the turn on which the effect expires, remove the effect from the Actor
+            //If the current turn is the turn on which the effect expires, remove the effect from the Actor; otherwise, have it take effect
             if (expires == turn)
-                removeTempEffect(effect);
+                removeEffect(effect);
+            else
+                effect.effect(this);
             
             Combat.delay(); //Run the Combat delay
             
@@ -585,7 +582,7 @@ public abstract class Actor extends Creature{
      * @param stat The name of the stat to be modified
      * @param modify The amount of points by which the stat is to be modified
      */
-    protected abstract void modifyStat(String stat, int modify);
+    protected abstract void modifyStat(Stat stat, int modify);
     
     //GETTERS/SETTERS
     
@@ -813,14 +810,6 @@ public abstract class Actor extends Creature{
         this.freezeRes = freezeRes;
     }
     
-    public ArrayList<StatusEffect> getStatus() {
-        return status;
-    }
-    
-    public void setStatus(ArrayList<StatusEffect> status) {
-        this.status = status;
-    }
-    
     public Runnable getAction() {
         return action;
     }
@@ -829,12 +818,12 @@ public abstract class Actor extends Creature{
         this.action = action;
     }
     
-    public HashMap<StatusEffect, Integer> getTempEffects() {
-        return tempEffects;
+    public HashMap<StatusEffect, Integer> getEffects() {
+        return effects;
     }
     
-    public void setTempEffects(HashMap<StatusEffect, Integer> tempEffects) {
-        this.tempEffects = tempEffects;
+    public void setEffects(HashMap<StatusEffect, Integer> effects) {
+        this.effects = effects;
     }
     
     public boolean isAlive() {

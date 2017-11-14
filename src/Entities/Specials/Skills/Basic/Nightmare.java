@@ -10,6 +10,7 @@ import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Specials.Skills.Skill;
+import Enums.Stat;
 import Main.Handler;
 import UI.UITextBox;
 import java.awt.Graphics;
@@ -72,8 +73,8 @@ public class Nightmare extends Skill{
             //Run through the enemy party and, if the enemy is alive, increase their strength by 3
             for (int i = 0; i < enemy.getParty().size(); i++){
                 if (enemy.getParty().get(i).isAlive()){
-                    enemy.getParty().get(i).modifyStat("Strength", 3);
-                    System.out.println(enemy.getParty().get(i).getName() + "'s strength increased by 3!");
+                    enemy.getParty().get(i).modifyStat(Stat.STRENGTH, 3);
+                    System.out.println(enemy.getParty().get(i).getName() + "'s Strength increased by 3!");
                 }
             }
             
@@ -85,8 +86,8 @@ public class Nightmare extends Skill{
         //Run through the enemy party and, if the enemy is alive, decrease their defense by 2
         for (int i = 0; i < enemy.getParty().size(); i++){
             if (enemy.getParty().get(i).isAlive()){
-                enemy.getParty().get(i).modifyStat("Defense", -2);
-                System.out.println(enemy.getParty().get(i).getName() + "'s defense decreased by 2!");
+                enemy.getParty().get(i).modifyStat(Stat.DEFENSE, -2);
+                System.out.println(enemy.getParty().get(i).getName() + "'s Defense decreased by 2!");
             }
         }
     }

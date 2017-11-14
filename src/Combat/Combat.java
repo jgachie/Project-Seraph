@@ -8,6 +8,7 @@ package Combat;
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
+import Enums.States;
 import Enums.StatusEffect;
 import Main.Handler;
 import UI.UITextBox;
@@ -15,6 +16,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.ListIterator;
 
 /**
  * Responsible for driving all combat logic in the game
@@ -96,16 +99,16 @@ public class Combat implements Runnable, Serializable{
             //Iterate through each Actor and, if they're alive, have them take their turn
             for (Actor actor : actors){
                 if (actor.isAlive()){
-                    ArrayList<StatusEffect> effects = actor.getStatus();
+                    HashMap<StatusEffect, Integer> effects = actor.getEffects();
                     
                     //If the Actor is stunned or frozen, skip their turn
-                    if (effects.contains(StatusEffect.FREEZE)){
+                    if (effects.containsKey(StatusEffect.FREEZE)){
                         UITextBox.resetBAOS();
                         System.out.println(actor.getName() + " is frozen!");
                         delay();
                         continue;
                     }
-                    else if (effects.contains(StatusEffect.STUN)){
+                    else if (effects.containsKey(StatusEffect.STUN)){
                         UITextBox.resetBAOS();
                         System.out.println(actor.getName() + " is stunned!");
                         delay();
@@ -123,6 +126,8 @@ public class Combat implements Runnable, Serializable{
             
             //Iterate through each Actor and, if they're alive, update their status effects
             for (Actor actor : actors){
+                UITextBox.resetBAOS();
+                System.out.println(actor.getName());
                 
                 if (actor.isAlive())
                     actor.updateStatus(numTurns);
@@ -167,10 +172,12 @@ public class Combat implements Runnable, Serializable{
         
         //If the Player won the battle, distribute each enemy's experience points to the entire party, and save the state of each member
         if (isPartyAlive() && !isEnemyAlive()){
-            for (PlayableActor member : party){
+            //Gotta use this weird loop and iterator to avoid a ConcurrentModificationException
+            for (final ListIterator<PlayableActor> i = party.listIterator(); i.hasNext();) {
+                final PlayableActor member = i.next();
                 //Party members only gain experience if they're still alive at the end of the battle
                 if (member.isAlive()){
-                    for (Actor enemy : enemyParty)
+                    for (Enemy enemy : enemyParty)
                         member.gainExp(enemy.getExp()); //Increase party member's experience by set enemy amount
                 }
                 
@@ -310,7 +317,7 @@ public class Combat implements Runnable, Serializable{
      * Ends the combat thread
      */
     public synchronized void stop(){
-        handler.getGame().setState("Game");
+        handler.getGame().setState(States.GAME);
         thread = null;
     }
 }

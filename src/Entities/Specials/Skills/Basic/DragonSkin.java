@@ -10,6 +10,7 @@ import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Specials.Skills.Skill;
 import Enums.DamageType;
+import Enums.Stat;
 import Enums.StatusEffect;
 import Main.Handler;
 import UI.UITextBox;
@@ -68,10 +69,10 @@ public class DragonSkin extends Skill{
         Combat.delay();
         
         System.out.println("...The skill succeeded!");
-        user.addTempEffect(StatusEffect.DRAGON_SKIN, 3);
+        user.addEffect(StatusEffect.DRAGON_SKIN, 3);
         System.out.println(user.getName() + "'s skin hardens into scales and a dark haze envelopes his body...");
-        user.modifyStat("Defense", 3);
-        System.out.println(user.getName() + "'s defense increased by 3!");
+        user.modifyStat(Stat.DEFENSE, 3);
+        System.out.println(user.getName() + "'s Defense increased by 3!");
     }
     
     /**

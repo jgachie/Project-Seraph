@@ -9,6 +9,7 @@ import Combat.Combat;
 import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Specials.Skills.Skill;
+import Enums.Stat;
 import Main.Handler;
 import UI.UITextBox;
 import java.awt.Graphics;
@@ -67,7 +68,7 @@ public class Accelerate extends Skill{
             System.out.println(user.getName() + " done goofed!");
         
         System.out.println("...The skill succeeded!");
-        user.modifyStat("Agility", 5);
-        System.out.println(user.getName() + "'s agiility increased by 5!");
+        user.modifyStat(Stat.AGILITY, 5);
+        System.out.println(user.getName() + "'s Agiility increased by 5!");
     }
 }

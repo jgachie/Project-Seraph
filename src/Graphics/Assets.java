@@ -16,7 +16,7 @@ public class Assets {
     private static final int T_WIDTH = 32, T_HEIGHT = 32; //Tile default width/height
     
     //Image assets
-    public transient static BufferedImage player, goblin, grass, water, stone, dirt, tree, btn, textBox, pauseScreen, pointer, magicBullet;
+    public transient static BufferedImage player, goblin, grass, water, stone, dirt, tree, btn, textBox, menu, pointer, magicBullet;
     
     //Animation assets
     public transient static BufferedImage[] playerDown, playerUp, playerRight, playerLeft;
@@ -50,7 +50,7 @@ public class Assets {
         tree = miscSheet.crop(T_WIDTH * 5, 0, T_WIDTH, T_HEIGHT * 2);
         btn = miscSheet.crop(192, 0, T_WIDTH * 4, T_HEIGHT * 2);
         textBox = miscSheet.crop(0, 64, 1024, 300);
-        pauseScreen = miscSheet.crop(0, 364, 1024, 768);
+        menu = miscSheet.crop(0, 364, 1024, 768);
         pointer = miscSheet.crop(320, 0, 38, 18);
         magicBullet = effectSheet.crop(84, 37, 16, 16);
         

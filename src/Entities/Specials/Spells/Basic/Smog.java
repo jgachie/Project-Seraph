@@ -10,6 +10,7 @@ import Entities.Creatures.Actors.Actor;
 import Entities.Creatures.Actors.Enemies.Enemy;
 import Entities.Creatures.Actors.PlayableActors.PlayableActor;
 import Entities.Specials.Spells.Spell;
+import Enums.Stat;
 import Main.Handler;
 import UI.UITextBox;
 import java.awt.Graphics;
@@ -72,10 +73,10 @@ public class Smog extends Spell{
         
         System.out.println("...The spell succeeded!");
         
-        System.out.println("The enemy party's dexterity fell by 2!");
-        
         //Decrease the dexterity of each of the enemy's party members by 2
         for (Enemy member : enemy.getParty())
-            member.modifyStat("Dexterity", -2);
+            member.modifyStat(Stat.DEXTERITY, -2);
+        
+        System.out.println("The enemy party's Dexterity fell by 2!");
     }
 }
